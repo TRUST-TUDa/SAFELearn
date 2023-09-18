@@ -28,6 +28,17 @@ cmake ..
 ```
 make
 ```
+
+# Setup with Docker
+1. Install docker
+2. Get the image: 
+```
+docker pull maettu102/safelearn:latest &&
+docker run -it maettu102/safelearn:latest /bin/bash
+```
+3. You should get a bash shell in the Workdir /Safelearn
+4. The executable is in the build directory
+
 # Running the code
 Some example test files are provided in the directory data, all constants in the code are already adapted to run this. If different data should be used, the constant DATA_DIR in constants.h need to be adapted. Furthermore, the IP address of the other server need to be changed. To ease the execution, currently 127.0.0.1 is set (although the experiments in the SAFELearn paper were executed on different servers). It should be noted that using localhost instead of an IP address does not seem to work.
 The test scenario can be executed by running 
@@ -59,3 +70,4 @@ The actual SMC happens in the directory mpcaggregator. Here, the code in MPCAggr
 The files in the directory mpcutils provide technical helper classes to simplify the usage of ABY. In particular, here wrappers for the circuits and shares of ABY are defined, to ensure compile errors when an arithmetic share is used as a Yao share. For this wrapper classes for all share types exist in the file MPCShare.h . The circuit classes in MPCCircuit.h hold the actual circuit from ABY and simply unwrap the actual share, performing some safety checks (e.g., to ensure that SIMD shares have the same length), forward the call to the actual circuit and return a wrapped version of the resulting ABY share.
 ### Utils
 The files in the directory utils provides constants/typedefs and utility functions that are not related to ABY. In particular, functions for loading the shares from text files (cf. read_local_models in ClientServerConnector.cpp), writing shares to text files (cf. send_aggregated_model in ClientServerConnector.cpp)
+
