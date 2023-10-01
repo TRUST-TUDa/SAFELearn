@@ -34,7 +34,14 @@ make
 2. Get the image: 
 ```
 docker pull maettu102/safelearn:latest &&
-docker run -it maettu102/safelearn:latest /bin/bash
+```
+3. Run the container with the image (name it safelearn):
+```
+docker run -itd --name safelearn maettu102/safelearn:latest &&
+```
+4. Connect to the container
+```
+docker exec -it safelearn /bin/bash
 ```
 3. You should get a bash shell in the Workdir /Safelearn
 4. The executable is in the build directory
