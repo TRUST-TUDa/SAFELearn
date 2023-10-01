@@ -28,3 +28,7 @@ WORKDIR /SAFELearn
 RUN sed -i 's|ABSOLUTE_PATH_TO_ABY|/ABY/build|g' ./CMakeLists.txt
 RUN sed -i 's|/include|/extern/ENCRYPTO_utils/include|g' ./CMakeLists.txt
 RUN mkdir build && cd build && cmake .. && make
+
+# allow colors in bash
+RUN echo 'PS1="\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> /root/.bashrc
+RUN echo "alias ls=\"ls --color=auto\""
