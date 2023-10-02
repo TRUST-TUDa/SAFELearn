@@ -25,7 +25,7 @@ RUN mkdir build && cd build && cmake .. && make && make install
 WORKDIR /SAFELearn
 RUN sed -i 's|ABSOLUTE_PATH_TO_ABY|/ABY/build|g' ./CMakeLists.txt \
 && sed -i 's|/include|/extern/ENCRYPTO_utils/include|g' ./CMakeLists.txt \
-&& mkdir build && cd build && cmake .. && make
+&& mkdir build && mkdir model && cd build && cmake .. && make
 
 # get pip and use it for installing modules
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py && rm get-pip.py && python3 -m pip install torch numpy

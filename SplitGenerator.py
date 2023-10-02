@@ -53,7 +53,7 @@ def split(restricted_vec):
 
 
 def create_splits(directory_name, sorted_layer_names, global_model_path, local_model_paths):
-    splitted_file_dir = "data/"+directory_name+"Splits"
+    splitted_file_dir = "data/"+directory_name
     if not os.path.exists(splitted_file_dir):
         os.mkdir(splitted_file_dir)
     global_model = torch.load(global_model_path)
@@ -66,8 +66,8 @@ def create_splits(directory_name, sorted_layer_names, global_model_path, local_m
         local_model_as_vec = get_one_vec_sorted_layers(local_model, sorted_layer_names)
         restricted_local_vec = restrict_values(local_model_as_vec)    
         a, b = split(restricted_local_vec)
-        a_file = f'{splitted_file_dir}/A_C{i:03d}.txt'
-        b_file = f'{splitted_file_dir}/B_C{i:03d}.txt'
+        a_file = f'{splitted_file_dir}Splits/A_C{i:03d}.txt'
+        b_file = f'{splitted_file_dir}Splits/B_C{i:03d}.txt'
         np.savetxt(a_file, a.numpy(), fmt='%d')
         np.savetxt(b_file, b.numpy(), fmt='%d')
     print(a_file)
