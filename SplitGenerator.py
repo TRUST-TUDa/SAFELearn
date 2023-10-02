@@ -53,8 +53,9 @@ def split(restricted_vec):
 
 
 def create_splits(directory_name, sorted_layer_names, global_model_path, local_model_paths):
-    splitted_file_dir = directory_name
-    os.mkdir(splitted_file_dir)
+    splitted_file_dir = "data/"+directory_name+"Splits"
+    if not os.path.exists(splitted_file_dir):
+        os.mkdir(splitted_file_dir)
     global_model = torch.load(global_model_path)
     global_model_as_vec = get_one_vec_sorted_layers(global_model, sorted_layer_names)
     restricted_vec = restrict_values(global_model_as_vec)    
@@ -65,8 +66,8 @@ def create_splits(directory_name, sorted_layer_names, global_model_path, local_m
         local_model_as_vec = get_one_vec_sorted_layers(local_model, sorted_layer_names)
         restricted_local_vec = restrict_values(local_model_as_vec)    
         a, b = split(restricted_local_vec)
-        a_file = f'{splitted_file_dir}A_C{i:03d}.txt'
-        b_file = f'{splitted_file_dir}B_C{i:03d}.txt'
+        a_file = f'{splitted_file_dir}/A_C{i:03d}.txt'
+        b_file = f'{splitted_file_dir}/B_C{i:03d}.txt'
         np.savetxt(a_file, a.numpy(), fmt='%d')
         np.savetxt(b_file, b.numpy(), fmt='%d')
     print(a_file)
@@ -100,3 +101,13 @@ def determine_aggregated_model(old_global_model, layer_names, path_to_share1, pa
 
     unrestricted_vec = unrestrict_values(torch.from_numpy(restricted_vec))
     return recover_model_from_vec(old_global_model, unrestricted_vec, layer_names)
+localmodelpaths = []
+localmodelpaths.append("./model/MyModelLocal")
+layer_names = [
+    '0.weight', '0.bias',   # First Linear Layer
+    '2.weight', '2.bias',   # Second Linear Layer
+    '4.weight', '4.bias',   # and so on...
+    '6.weight', '6.bias',
+    '8.weight', '8.bias'
+]
+create_splits("MyTestDir",layer_names,"./model/MyModel",localmodelpaths)
