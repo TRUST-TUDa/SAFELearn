@@ -33,11 +33,11 @@ make
 1. Install docker
 2. Get the image: 
 ```
-docker pull maettu102/safelearn:latest &&
+docker pull maettu102/safelearn:latest
 ```
 3. Run the container with the image (name it safelearn):
 ```
-docker run -itd --name safelearn maettu102/safelearn:latest &&
+docker run -itd --name safelearn maettu102/safelearn:latest
 ```
 4. Connect to the container
 ```
