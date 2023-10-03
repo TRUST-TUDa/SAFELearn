@@ -112,4 +112,5 @@ layer_names = [
     '6.weight', '6.bias',
     '8.weight', '8.bias'
 ]
-create_splits("MyTestDir",layer_names,"./model/MyModel",localmodelpaths)
+newmodel = determine_aggregated_model("./model/MyModel", layer_names, "./data/Aggregated/AggregatedModel_A.txt", "./data/Aggregated/AggregatedModel_B.txt")
+torch.save(newmodel, "./model/NewModel")
