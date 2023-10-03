@@ -29,11 +29,7 @@ RUN sed -i 's|ABSOLUTE_PATH_TO_ABY|/ABY/build|g' ./CMakeLists.txt \
 
 # get pip and use it for installing modules
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py && rm get-pip.py 
-RUN python3 -m pip install filelock
-RUN python3 -m pip install sympy
 RUN python3 -m pip install numpy
-RUN python3 -m pip install networkx
-RUN python3 -m pip install jinja2
 RUN python3 -m pip install torch==2.0.1+cpu -f https://download.pytorch.org/whl/torch_stable.html 
 
 
