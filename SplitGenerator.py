@@ -94,13 +94,15 @@ def recover_model_from_vec(example_model, vec_to_recover, layer_names):
     return result
 
 
-def determine_aggregated_model(old_global_model, layer_names, path_to_share1, path_to_share2):
+def determine_aggregated_model(old_global_model_path, layer_names, path_to_share1, path_to_share2):
+    old_global_model = torch.load(old_global_model_path)
     share1 = np.loadtxt(path_to_share1)
     share2 = np.loadtxt(path_to_share2)
     restricted_vec = share1 + share2
 
     unrestricted_vec = unrestrict_values(torch.from_numpy(restricted_vec))
     return recover_model_from_vec(old_global_model, unrestricted_vec, layer_names)
+
 localmodelpaths = []
 localmodelpaths.append("./model/MyModelLocal")
 layer_names = [
@@ -111,3 +113,5 @@ layer_names = [
     '8.weight', '8.bias'
 ]
 create_splits("MyTestDir",layer_names,"./model/MyModel",localmodelpaths)
+#newmodel = determine_aggregated_model("./model/MyModel", layer_names, "./data/Aggregated/AggregatedModel_A.txt", "./data/Aggregated/AggregatedModel_B.txt")
+#torch.save(newmodel, "./model/NewModel")
