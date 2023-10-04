@@ -32,8 +32,9 @@ model = nn.Sequential(
 print(model)
  
 # train the model
-loss_fn = nn.MSELoss()
-#loss_fn   = nn.BCELoss()  # binary cross entropy
+model.train()
+#loss_fn = nn.MSELoss()
+loss_fn   = nn.BCELoss()  # binary cross entropy
 optimizer = optim.Adam(model.parameters(), lr=0.001)
  
 n_epochs = 100
@@ -56,6 +57,7 @@ X_test = torch.tensor(X, dtype=torch.float32)
 y_test = torch.tensor(y, dtype=torch.float32).reshape(-1, 1)
 
 # compute accuracy (no_grad is optional)
+model.eval()
 with torch.no_grad():
     y_pred = model(X_test)
 accuracy = (y_pred.round() == y_test).float().mean()
