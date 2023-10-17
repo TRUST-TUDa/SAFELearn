@@ -29,18 +29,11 @@ generator1 = torch.Generator().manual_seed(42)
 generator2 = torch.Generator().manual_seed(42)
 
 
-if(version == "1"):
-    dataset = fullset[:50000, :]
-    train_size = int(0.8 * len(dataset))
-    test_size = len(dataset) - train_size
-    trainset, TestSet = loader.random_split(dataset, [train_size, test_size], generator=generator1)
-else:
-    dataset = fullset[50000:,:]
-    train_size = int(0.8 * len(dataset))
-    test_size = len(dataset) - train_size
-    trainset, TestSet = loader.random_split(dataset, [train_size, test_size], generator=generator2)
+train_size = int(0.8 * len(fullset))
+test_size = len(fullset) - train_size
+trainset, TestSet = loader.random_split(fullset, [train_size, test_size], generator=generator1)
 
-dataLoader = loader.DataLoader(dataset)
+dataLoader = loader.DataLoader(fullset)
 print(trainset.dataset[:, :8])
 
 
@@ -64,26 +57,7 @@ model = nn.Sequential(
     nn.Linear(4, 1),
     nn.Sigmoid()
 )
-print(model)
- 
-# train the model
-loss_fn   = nn.BCELoss()  # binary cross entropy    # np.MSELoss
-optimizer = optim.Adam(model.parameters(), lr=0.01)
- 
-n_epochs = 100
-batch_size = 100
- 
-for epoch in range(n_epochs):
-    for i in range(0, len(X), batch_size): # make this random
-        Xbatch = X[i:i+batch_size]
-        
-        y_pred = model(Xbatch)
-        ybatch = y[i:i+batch_size]
-        loss = loss_fn(y_pred, ybatch)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-    print(f'Finished epoch {epoch}, latest loss {loss}')
+model.load_state_dict(torch.load("model/NewModel"))
 
 X_test = TestSet.dataset[:, :8]
 y_test = TestSet.dataset[:,8]
@@ -107,9 +81,4 @@ with torch.no_grad():
     print(f"F1 Score: {f1_score}")
     print(f"Recall: {recall}")
     print(f"Precision: {precision}")
-
-if(version =="1"):
-    torch.save(model.state_dict(), "model/GlobalModel")
-else:
-    torch.save(model.state_dict(), "model/LocalModel")
 

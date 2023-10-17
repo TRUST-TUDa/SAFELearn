@@ -112,5 +112,5 @@ layer_names = [
     '6.weight', '6.bias',
     '8.weight', '8.bias'
 ]
-newmodel = determine_aggregated_model("./model/MyModel", layer_names, "./data/Aggregated/AggregatedModel_A.txt", "./data/Aggregated/AggregatedModel_B.txt")
+newmodel = determine_aggregated_model("./model/GlobalModel", layer_names, "./data/Aggregated/AggregatedModel_A.txt", "./data/Aggregated/AggregatedModel_B.txt")
 torch.save(newmodel, "./model/NewModel")

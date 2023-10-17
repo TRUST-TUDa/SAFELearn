@@ -1,11 +1,14 @@
 import torch
 import os
 import numpy as np
+import sys
 
 
 PUSH_FACTOR = 2 ** 10
 LIMIT = (2 ** 3) * PUSH_FACTOR
 
+if(len(sys.argv)==1):
+    print("For splitting use: python3", sys.argv[0], "split\nFor aggregating use: python3", sys.argv[0], "aggregate")
 
 def get_one_vec_sorted_layers(model):
     layer_names = model.keys()
@@ -95,8 +98,9 @@ def recover_model_from_vec(example_model, vec_to_recover, layer_names):
     return result
 
 
-def determine_aggregated_model(old_global_model_path, layer_names, path_to_share1, path_to_share2):
+def determine_aggregated_model(old_global_model_path, path_to_share1, path_to_share2):
     old_global_model = torch.load(old_global_model_path)
+    layer_names = old_global_model.keys()
     share1 = np.loadtxt(path_to_share1)
     share2 = np.loadtxt(path_to_share2)
     restricted_vec = share1 + share2
@@ -104,6 +108,13 @@ def determine_aggregated_model(old_global_model_path, layer_names, path_to_share
     unrestricted_vec = unrestrict_values(torch.from_numpy(restricted_vec))
     return recover_model_from_vec(old_global_model, unrestricted_vec, layer_names)
 
-localmodelpaths = []
-localmodelpaths.append("./model/LocalModel")
-create_splits("MyTestDir","./model/GlobalModel",localmodelpaths)
+if (len(sys.argv) >1 and sys.argv[1] == "split"):
+    print("Splitting to data/MyTestDir")
+    localmodelpaths = []
+    localmodelpaths.append("./model/LocalModel")
+    create_splits("MyTestDir","./model/GlobalModel",localmodelpaths)
+
+if (len(sys.argv) >1 and sys.argv[1] == "aggregate"):
+    print("Aggregating!")
+    newmodel = determine_aggregated_model("./model/GlobalModel", "./data/Aggregated/AggregatedModel_A.txt", "./data/Aggregated/AggregatedModel_B.txt")
+    torch.save(newmodel, "./model/NewModel")
