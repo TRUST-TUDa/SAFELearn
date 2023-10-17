@@ -5,8 +5,9 @@ import torch.optim as optim
 import torch.utils.data as loader
 import sys as sys
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.to(device)
+if(len(sys.argv)==1):
+    print("For GlobalModel use: python3", sys.argv[0], "global\nFor LocalModel use: python3", sys.argv[0], "local")
+    quit()
 
 version = sys.argv[1]
 def compute_recall(TP, FN):
@@ -29,12 +30,12 @@ generator1 = torch.Generator().manual_seed(42)
 generator2 = torch.Generator().manual_seed(42)
 
 
-if(version == "1"):
+if(version == "global"):
     dataset = fullset[:50000, :]
     train_size = int(0.8 * len(dataset))
     test_size = len(dataset) - train_size
     trainset, TestSet = loader.random_split(dataset, [train_size, test_size], generator=generator1)
-else:
+if(version == "local"):
     dataset = fullset[50000:,:]
     train_size = int(0.8 * len(dataset))
     test_size = len(dataset) - train_size
@@ -108,8 +109,8 @@ with torch.no_grad():
     print(f"Recall: {recall}")
     print(f"Precision: {precision}")
 
-if(version =="1"):
+if(version =="global"):
     torch.save(model.state_dict(), "model/GlobalModel")
-else:
+if(version =="local"):
     torch.save(model.state_dict(), "model/LocalModel")
 

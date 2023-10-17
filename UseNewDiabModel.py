@@ -5,10 +5,6 @@ import torch.optim as optim
 import torch.utils.data as loader
 import sys as sys
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.to(device)
-
-version = sys.argv[1]
 def compute_recall(TP, FN):
     return TP/ (TP + FN + 1e-8)
 
@@ -58,6 +54,8 @@ model = nn.Sequential(
     nn.Sigmoid()
 )
 model.load_state_dict(torch.load("model/NewModel"))
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
 
 X_test = TestSet.dataset[:, :8]
 y_test = TestSet.dataset[:,8]

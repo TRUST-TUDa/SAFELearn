@@ -115,6 +115,6 @@ if (len(sys.argv) >1 and sys.argv[1] == "split"):
     create_splits("MyTestDir","./model/GlobalModel",localmodelpaths)
 
 if (len(sys.argv) >1 and sys.argv[1] == "aggregate"):
-    print("Aggregating!")
+    print("Aggregating! - new model will be saved at model/NewModel")
     newmodel = determine_aggregated_model("./model/GlobalModel", "./data/Aggregated/AggregatedModel_A.txt", "./data/Aggregated/AggregatedModel_B.txt")
     torch.save(newmodel, "./model/NewModel")
