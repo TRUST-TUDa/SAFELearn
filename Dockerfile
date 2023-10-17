@@ -19,13 +19,13 @@ RUN git clone https://github.com/encryptogroup/ABY.git && git clone https://gith
 
 # Compile ABY
 WORKDIR /ABY
-RUN mkdir build && cd build && cmake .. && make && make install 
+RUN mkdir -p build && cd build && cmake .. && make && make install 
 
 # Adjust variables in CMakeLists.txt and build Safelearn
 WORKDIR /SAFELearn
 RUN sed -i 's|ABSOLUTE_PATH_TO_ABY|/ABY/build|g' ./CMakeLists.txt \
 && sed -i 's|/include|/extern/ENCRYPTO_utils/include|g' ./CMakeLists.txt \
-&& mkdir build && mkdir model && cd build && cmake .. && make
+&& mkdir -p build && mkdir -p model && cd build && cmake .. && make
 
 # get pip and use it for installing modules
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py && rm get-pip.py 

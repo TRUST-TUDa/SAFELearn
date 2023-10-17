@@ -2,10 +2,23 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
- 
+
+
+def compute_recall(TP, FN):
+    return TP/ (TP + FN + 1e-8)
+
+def compute_precision(TP, FP):
+    return TP / (TP + FP + 1e-8)
+
+def compute_f1_score(precision, recall):
+    # Convert predictions to boolean values (0 or 1)
+    f1_score = 2 * (precision * recall) / (precision + recall + 1e-8)
+    return f1_score.item()
+
+
 # load the dataset, split into input (X) and output (y) variables
-dataset = np.loadtxt('Prepped_diabetes_data.data', delimiter=',')
-TestSet = np.loadtxt('Prepped_diabetes_data.data', delimiter=',')
+dataset = np.loadtxt('data/Prepped_diabetes_data.data', delimiter=',')
+TestSet = np.loadtxt('data/Prepped_diabetes_data.data', delimiter=',')
 X = dataset[:, :8]
 y = dataset[:,8]
  
@@ -55,7 +68,18 @@ y_test = torch.tensor(y, dtype=torch.float32).reshape(-1, 1)
 # compute accuracy (no_grad is optional)
 with torch.no_grad():
     y_pred = model(X_test)
-accuracy = (y_pred.round() == y_test).float().mean()
-print(f"Accuracy {accuracy}")
+    accuracy = (y_pred.round() == y_test).float().mean()
+    TP = (y_test * y_pred).sum()
+    FP = ((1 - y_test) * y_pred).sum()
+    FN = (y_test * (1 - y_pred)).sum()
+    
+    recall = compute_recall(TP, FN)
+    precision = compute_precision(TP,FP)
+    f1_score = compute_f1_score(precision, recall)
+    print(f"Accuracy {accuracy}")
+    print(f"F1 Score: {f1_score}")
+    print(f"Recall: {recall}")
+    print(f"Precision: {precision}")
 
-torch.save(model, "myModel")
+torch.save(model, "model/myModel")
+
