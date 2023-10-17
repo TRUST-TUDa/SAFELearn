@@ -6,7 +6,7 @@ import torch.utils.data as loader
 import sys as sys
 
 version = sys.argv[1]
-
+print(version =="1")
 def compute_recall(TP, FN):
     return TP/ (TP + FN + 1e-8)
 
@@ -27,7 +27,8 @@ generator1 = torch.Generator().manual_seed(42)
 generator2 = torch.Generator().manual_seed(42)
 
 
-if(version == 1):
+if(version == "1"):
+    print("version!")
     dataset = fullset[:50000, :]
     train_size = int(0.8 * len(dataset))
     test_size = len(dataset) - train_size
@@ -50,9 +51,9 @@ y = torch.tensor(y, dtype=torch.float32).reshape(-1, 1)
  
 # define the model
 model = nn.Sequential(
-    nn.Linear(8, 16),
+    nn.Linear(8, 20),
     nn.ReLU(),
-    nn.Linear(16, 10),
+    nn.Linear(20, 10),
     nn.ReLU(),
     #nn.Linear(12, 7),
     #nn.ReLU(),
@@ -60,12 +61,12 @@ model = nn.Sequential(
     nn.ReLU(),
     #nn.Softmax()
     nn.Linear(4, 1),
-    #nn.Sigmoid()
+    nn.Sigmoid()
 )
 print(model)
  
 # train the model
-loss_fn   = nn.BCEWithLogitsLoss()  # binary cross entropy    # np.MSELoss
+loss_fn   = nn.BCELoss()  # binary cross entropy    # np.MSELoss
 optimizer = optim.Adam(model.parameters(), lr=0.01)
  
 n_epochs = 100
@@ -85,18 +86,18 @@ for epoch in range(n_epochs):
 
 X_test = TestSet.dataset[:, :8]
 y_test = TestSet.dataset[:,8]
-X_test = torch.tensor(X, dtype=torch.float32)
-y_test = torch.tensor(y, dtype=torch.float32).reshape(-1, 1)
+X_test = torch.tensor(X_test, dtype=torch.float32)
+y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 
 # compute accuracy (no_grad is optional)
 with torch.no_grad():
     y_pred = model(X_test)
-    accuracy = (y_pred.round() == y_test).float().mean()
-    TP = (y_test * y_pred).sum()
-    FP = ((1 - y_test) * y_pred).sum()
-    FN = (y_test * (1 - y_pred)).sum()
-    
-    
+    y_pred_binary = y_pred.round()
+    print(y_test)
+    accuracy = (y_pred_binary == y_test).float().mean()
+    TP = ((y_pred_binary == 1) & (y_test == 1)).float().sum()
+    FP = ((y_pred_binary == 1) & (y_test == 0)).float().sum()
+    FN = ((y_pred_binary == 0) & (y_test == 1)).float().sum()
     
     recall = compute_recall(TP, FN)
     precision = compute_precision(TP,FP)
@@ -106,7 +107,7 @@ with torch.no_grad():
     print(f"Recall: {recall}")
     print(f"Precision: {precision}")
 
-if(version ==1):
+if(version =="1"):
     torch.save(model, "model/GlobalModel")
 else:
     torch.save(model, "model/LocalModel")
