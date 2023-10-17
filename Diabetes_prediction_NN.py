@@ -2,7 +2,10 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import torch.utils.data as loader
+import sys as sys
 
+version = sys.argv[1]
 
 def compute_recall(TP, FN):
     return TP/ (TP + FN + 1e-8)
@@ -17,10 +20,30 @@ def compute_f1_score(precision, recall):
 
 
 # load the dataset, split into input (X) and output (y) variables
-dataset = np.loadtxt('data/Prepped_diabetes_data.data', delimiter=',')
-TestSet = np.loadtxt('data/Prepped_diabetes_data.data', delimiter=',')
-X = dataset[:, :8]
-y = dataset[:,8]
+fullset = np.loadtxt('data/Prepped_diabetes_data.data', delimiter=',')
+#TestSet = np.loadtxt('data/Prepped_diabetes_data.data', delimiter=',')
+
+generator1 = torch.Generator().manual_seed(42)
+generator2 = torch.Generator().manual_seed(42)
+
+
+if(version == 1):
+    dataset = fullset[:50000, :]
+    train_size = int(0.8 * len(dataset))
+    test_size = len(dataset) - train_size
+    trainset, TestSet = loader.random_split(dataset, [train_size, test_size], generator=generator1)
+else:
+    dataset = fullset[50000:,:]
+    train_size = int(0.8 * len(dataset))
+    test_size = len(dataset) - train_size
+    trainset, TestSet = loader.random_split(dataset, [train_size, test_size], generator=generator2)
+
+dataLoader = loader.DataLoader(dataset)
+print(trainset.dataset[:, :8])
+
+
+X = trainset.dataset[:, :8]
+y = trainset.dataset[:,8]
  
 X = torch.tensor(X, dtype=torch.float32)
 y = torch.tensor(y, dtype=torch.float32).reshape(-1, 1)
@@ -37,12 +60,12 @@ model = nn.Sequential(
     nn.ReLU(),
     #nn.Softmax()
     nn.Linear(4, 1),
-    nn.Sigmoid()
+    #nn.Sigmoid()
 )
 print(model)
  
 # train the model
-loss_fn   = nn.BCELoss()  # binary cross entropy    # np.MSELoss
+loss_fn   = nn.BCEWithLogitsLoss()  # binary cross entropy    # np.MSELoss
 optimizer = optim.Adam(model.parameters(), lr=0.01)
  
 n_epochs = 100
@@ -60,8 +83,8 @@ for epoch in range(n_epochs):
         optimizer.step()
     print(f'Finished epoch {epoch}, latest loss {loss}')
 
-X_test = TestSet[:, :8]
-y_test = TestSet[:,8]
+X_test = TestSet.dataset[:, :8]
+y_test = TestSet.dataset[:,8]
 X_test = torch.tensor(X, dtype=torch.float32)
 y_test = torch.tensor(y, dtype=torch.float32).reshape(-1, 1)
 
@@ -73,6 +96,8 @@ with torch.no_grad():
     FP = ((1 - y_test) * y_pred).sum()
     FN = (y_test * (1 - y_pred)).sum()
     
+    
+    
     recall = compute_recall(TP, FN)
     precision = compute_precision(TP,FP)
     f1_score = compute_f1_score(precision, recall)
@@ -81,5 +106,8 @@ with torch.no_grad():
     print(f"Recall: {recall}")
     print(f"Precision: {precision}")
 
-torch.save(model, "model/myModel")
+if(version ==1):
+    torch.save(model, "model/GlobalModel")
+else:
+    torch.save(model, "model/LocalModel")
 
