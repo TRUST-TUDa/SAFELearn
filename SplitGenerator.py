@@ -7,7 +7,8 @@ PUSH_FACTOR = 2 ** 10
 LIMIT = (2 ** 3) * PUSH_FACTOR
 
 
-def get_one_vec_sorted_layers(model, layer_names):
+def get_one_vec_sorted_layers(model):
+    layer_names = model.keys()
     size = 0
     for name in layer_names:
         size += model[name].view(-1).shape[0]
@@ -52,18 +53,18 @@ def split(restricted_vec):
     return a, b
 
 
-def create_splits(directory_name, sorted_layer_names, global_model_path, local_model_paths):
+def create_splits(directory_name, global_model_path, local_model_paths):
     splitted_file_dir = "data/"+directory_name+"Splits"
     if not os.path.exists(splitted_file_dir):
         os.mkdir(splitted_file_dir)
     global_model = torch.load(global_model_path)
-    global_model_as_vec = get_one_vec_sorted_layers(global_model, sorted_layer_names)
+    global_model_as_vec = get_one_vec_sorted_layers(global_model)
     restricted_vec = restrict_values(global_model_as_vec)    
     np.savetxt(splitted_file_dir + '/global.txt', restricted_vec.numpy(), fmt='%d')
     
     for i, model_path in enumerate(local_model_paths):
         local_model = torch.load(model_path)
-        local_model_as_vec = get_one_vec_sorted_layers(local_model, sorted_layer_names)
+        local_model_as_vec = get_one_vec_sorted_layers(local_model)
         restricted_local_vec = restrict_values(local_model_as_vec)    
         a, b = split(restricted_local_vec)
         a_file = f'{splitted_file_dir}/A_C{i:03d}.txt'
@@ -104,12 +105,5 @@ def determine_aggregated_model(old_global_model_path, layer_names, path_to_share
     return recover_model_from_vec(old_global_model, unrestricted_vec, layer_names)
 
 localmodelpaths = []
-localmodelpaths.append("./model/MyModelLocal")
-layer_names = [
-    '0.weight', '0.bias',   # First Linear Layer
-    '2.weight', '2.bias',   # Second Linear Layer
-    '4.weight', '4.bias',   # and so on...
-    '6.weight', '6.bias',
-    '8.weight', '8.bias'
-]
-create_splits("MyTestDir",layer_names,"./model/MyModel",localmodelpaths)
+localmodelpaths.append("./model/LocalModel")
+create_splits("MyTestDir","./model/GlobalModel",localmodelpaths)

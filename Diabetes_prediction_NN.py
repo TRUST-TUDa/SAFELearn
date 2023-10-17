@@ -108,7 +108,7 @@ with torch.no_grad():
     print(f"Precision: {precision}")
 
 if(version =="1"):
-    torch.save(model, "model/GlobalModel")
+    torch.save(model.state_dict(), "model/GlobalModel")
 else:
-    torch.save(model, "model/LocalModel")
+    torch.save(model.state_dict(), "model/LocalModel")
 
