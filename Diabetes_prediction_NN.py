@@ -44,7 +44,6 @@ if(version == "local"):
     trainset, TestSet = loader.random_split(dataset, [train_size, test_size], generator=generator2)
 
 dataLoader = loader.DataLoader(dataset)
-print(trainset.dataset[:, :8])
 
 
 X = trainset.dataset[:, :8]
@@ -52,6 +51,11 @@ y = trainset.dataset[:,8]
  
 X = torch.tensor(X, dtype=torch.float32)
 y = torch.tensor(y, dtype=torch.float32).reshape(-1, 1)
+
+X_test = TestSet.dataset[:, :8]
+y_test = TestSet.dataset[:,8]
+X_test = torch.tensor(X_test, dtype=torch.float32)
+y_test = torch.tensor(y_test, dtype=torch.int32).reshape(-1, 1)
  
 # define the model
 model = nn.Sequential(
@@ -68,13 +72,15 @@ model = nn.Sequential(
     nn.Sigmoid()
 )
 print(model)
- 
+
+
+
 # train the model
 loss_fn   = nn.BCELoss()  # binary cross entropy    # np.MSELoss
 optimizer = optim.Adam(model.parameters(), lr=0.001) #try stuff
  
 n_epochs = 100
-batch_size = 1000
+batch_size = 100
  
 for epoch in range(n_epochs):
     for i in range(0, len(X), batch_size): # make this random
@@ -88,16 +94,15 @@ for epoch in range(n_epochs):
         optimizer.step()
     print(f'Finished epoch {epoch}, latest loss {loss}')
 
-X_test = TestSet.dataset[:, :8]
-y_test = TestSet.dataset[:,8]
-X_test = torch.tensor(X_test, dtype=torch.float32)
-y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
+
 
 # compute accuracy (no_grad is optional)
 with torch.no_grad():
     y_pred = model(X_test)
     y_pred_binary = y_pred.round()
-    print(y_test)
+    
+    #print(y_test)
+    #print(y_pred_binary)
     accuracy = (y_pred_binary == y_test).float().mean()
     TP = ((y_pred_binary == 1) & (y_test == 1)).float().sum()
     FP = ((y_pred_binary == 1) & (y_test == 0)).float().sum()
@@ -105,14 +110,15 @@ with torch.no_grad():
     
     
     
-    precision = sklm.precision_score(y_pred_binary, y_test)
-    recall = sklm.recall_score(y_pred_binary, y_test)
-    f1score = sklm.f1_score(y_pred_binary, y_test)
-    accuracy = sklm.accuracy_score(y_pred, y_test)
+    precision_sklm = sklm.precision_score(y_pred_binary, y_test)
+    recall_sklm = sklm.recall_score(y_pred_binary, y_test)
+    f1score_sklm = sklm.f1_score(y_pred_binary, y_test)
+    accuracy_sklm = sklm.accuracy_score(y_pred_binary, y_test)
     
-    print("prec: ", precision)
-    print("recall: ", recall)
-    print("f1score: ", f1score)
+    print("prec: ", precision_sklm)
+    print("recall: ", recall_sklm)
+    print("f1score: ", f1score_sklm)
+    print("accuracy ", accuracy_sklm)
     
     recall = compute_recall(TP, FN)
     precision = compute_precision(TP,FP)
