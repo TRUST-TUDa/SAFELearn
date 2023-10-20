@@ -4,6 +4,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as loader
 import sys as sys
+import sklearn as skl
+import sklearn.metrics as sklm
 
 if(len(sys.argv)==1):
     print("For GlobalModel use: python3", sys.argv[0], "global\nFor LocalModel use: python3", sys.argv[0], "local")
@@ -69,10 +71,10 @@ print(model)
  
 # train the model
 loss_fn   = nn.BCELoss()  # binary cross entropy    # np.MSELoss
-optimizer = optim.Adam(model.parameters(), lr=0.01)
+optimizer = optim.Adam(model.parameters(), lr=0.001) #try stuff
  
 n_epochs = 100
-batch_size = 100
+batch_size = 1000
  
 for epoch in range(n_epochs):
     for i in range(0, len(X), batch_size): # make this random
@@ -101,13 +103,24 @@ with torch.no_grad():
     FP = ((y_pred_binary == 1) & (y_test == 0)).float().sum()
     FN = ((y_pred_binary == 0) & (y_test == 1)).float().sum()
     
+    
+    
+    precision = sklm.precision_score(y_pred_binary, y_test)
+    recall = sklm.recall_score(y_pred_binary, y_test)
+    f1score = sklm.f1_score(y_pred_binary, y_test)
+    accuracy = sklm.accuracy_score(y_pred, y_test)
+    
+    print("prec: ", precision)
+    print("recall: ", recall)
+    print("f1score: ", f1score)
+    
     recall = compute_recall(TP, FN)
     precision = compute_precision(TP,FP)
     f1_score = compute_f1_score(precision, recall)
-    print(f"Accuracy {accuracy}")
-    print(f"F1 Score: {f1_score}")
-    print(f"Recall: {recall}")
-    print(f"Precision: {precision}")
+    print(f"Accuracy mättu: {accuracy}")
+    print(f"F1 Score mättu: {f1_score}")
+    print(f"Recall mättu: {recall}")
+    print(f"Precision mättu: {precision}")
 
 if(version =="global"):
     torch.save(model.state_dict(), "model/GlobalModel")
