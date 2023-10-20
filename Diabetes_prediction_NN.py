@@ -12,6 +12,7 @@ if(len(sys.argv)==1):
     quit()
 
 version = sys.argv[1]
+
 def compute_recall(TP, FN):
     return TP/ (TP + FN + 1e-8)
 
@@ -32,18 +33,21 @@ generator1 = torch.Generator().manual_seed(42)
 generator2 = torch.Generator().manual_seed(42)
 
 
-if(version == "global"):
-    dataset = fullset[:50000, :]
-    train_size = int(0.8 * len(dataset))
-    test_size = len(dataset) - train_size
-    trainset, TestSet = loader.random_split(dataset, [train_size, test_size], generator=generator1)
-if(version == "local"):
-    dataset = fullset[50000:,:]
-    train_size = int(0.8 * len(dataset))
-    test_size = len(dataset) - train_size
-    trainset, TestSet = loader.random_split(dataset, [train_size, test_size], generator=generator2)
 
-dataLoader = loader.DataLoader(dataset)
+set_size = int(0.5 * len(fullset))
+SetGlobal, SetLocal = loader.random_split(fullset, [set_size, set_size], generator=generator1)
+
+train_size = int(0.8 * len(SetGlobal))
+test_size = len(SetGlobal) - train_size
+
+if(version == "global"):
+    trainset, TestSet = loader.random_split(SetGlobal, [train_size, test_size], generator=generator1)
+    dataLoader = loader.DataLoader(SetGlobal)
+if(version == "local"):
+    trainset, TestSet = loader.random_split(SetLocal, [train_size, test_size], generator=generator2)
+    dataLoader = loader.DataLoader(SetLocal)
+
+
 
 
 X = trainset.dataset[:, :8]
