@@ -9,6 +9,8 @@ import torch.utils.data as loader
 from sklearn.metrics import classification_report
 from sklearn.model_selection import GridSearchCV
 import sys as sys
+from joblib import dump, load
+
 
 
 if(len(sys.argv)==1):
@@ -26,7 +28,7 @@ fullset = np.loadtxt('data/Prepped_diabetes_data.data', delimiter=',')
 generator1 = torch.Generator().manual_seed(42)
 generator2 = torch.Generator().manual_seed(42)
 
-train_size = int(0.5 * len(fullset))
+train_size = int(0.8 * len(fullset))
 test_size = len(fullset) - train_size
 trainset, TestSet = loader.random_split(fullset, [train_size, test_size], generator=generator1)
     
@@ -51,7 +53,11 @@ param_grid = {'C': [0.1, 1, 10, 100, 1000],
               'gamma': [1, 0.1, 0.01, 0.001, 0.0001], 
               'kernel': ['rbf']}  
   
-model = GridSearchCV(SVC(), param_grid, refit = True, verbose = 3) 
+#model = GridSearchCV(SVC(), param_grid, refit = True, verbose = 3) 
+
+
+#best params we found
+model = SVC(C=1000, gamma=0.0001, kernel='rbf')
 
 print("Model pramaters", model.get_params())
 
@@ -60,7 +66,10 @@ y_pred = model.predict(X_test)
 
 print(classification_report(y_true=y_test, y_pred=y_pred, digits=3))
 
-if(version =="global"):
-    torch.save(model.state_dict(), "model/GlobalModel")
-if(version =="local"):
-    torch.save(model.state_dict(), "model/LocalModel")
+
+
+dump(model, 'SVM_trained-model.joblib') 
+
+
+
+print(model.get_params())
