@@ -8,7 +8,7 @@ PUSH_FACTOR = 2 ** 10
 LIMIT = (2 ** 3) * PUSH_FACTOR
 
 if(len(sys.argv)==1):
-    print("For splitting use: python3", sys.argv[0], "split\nFor aggregating use: python3", sys.argv[0], "aggregate")
+    print("For splitting use: python3", sys.argv[0], "split\nFor aggregating use: python3", sys.argv[0], "combine")
 
 def get_one_vec_sorted_layers(model):
     layer_names = model.keys()
@@ -114,7 +114,7 @@ if (len(sys.argv) >1 and sys.argv[1] == "split"):
     localmodelpaths.append("./model/LocalModel")
     create_splits("MyTestDir","./model/GlobalModel",localmodelpaths)
 
-if (len(sys.argv) >1 and sys.argv[1] == "aggregate"):
+if (len(sys.argv) >1 and sys.argv[1] == "combine"):
     print("Aggregating! - new model will be saved at model/NewModel")
     newmodel = determine_aggregated_model("./model/GlobalModel", "./data/Aggregated/AggregatedModel_A.txt", "./data/Aggregated/AggregatedModel_B.txt")
     torch.save(newmodel, "./model/NewModel")
