@@ -31,7 +31,7 @@ fullset = np.loadtxt('data/Prepped_diabetes_data.data', delimiter=',')
 
 generator1 = torch.Generator().manual_seed(42)
 generator2 = torch.Generator().manual_seed(42)
-
+torch.manual_seed(42)
 
 
 set_size = int(0.5 * len(fullset))
@@ -130,9 +130,11 @@ with torch.no_grad():
     print(f"Recall mättu: {recall}")
     print(f"Precision mättu: {precision}")
 
+dicti = model.state_dict()
+for k in dicti: 
+    print(k)
+    print(dicti[k])
 
-dict = model.state_dict()
-print(model)
 if(version =="global"):
     torch.save(model.state_dict(), "model/GlobalModel")
 if(version =="local"):

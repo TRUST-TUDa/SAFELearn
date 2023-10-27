@@ -3,12 +3,14 @@ import os
 import numpy as np
 import sys
 
+torch.manual_seed(42)
 
 PUSH_FACTOR = 2 ** 10
 LIMIT = (2 ** 3) * PUSH_FACTOR
 
 if(len(sys.argv)==1):
     print("For splitting use: python3", sys.argv[0], "split\nFor aggregating use: python3", sys.argv[0], "combine")
+
 
 def get_one_vec_sorted_layers(model):
     layer_names = model.keys()
@@ -68,7 +70,11 @@ def create_splits(directory_name, global_model_path, local_model_paths):
     for i, model_path in enumerate(local_model_paths):
         local_model = torch.load(model_path)
         local_model_as_vec = get_one_vec_sorted_layers(local_model)
+        print("local model as vec")
+        print(local_model_as_vec)
         restricted_local_vec = restrict_values(local_model_as_vec)    
+        print("restricted model as vec")
+        print(restricted_local_vec)
         a, b = split(restricted_local_vec)
         a_file = f'{splitted_file_dir}/A_C{i:03d}.txt'
         b_file = f'{splitted_file_dir}/B_C{i:03d}.txt'
