@@ -23,18 +23,17 @@ fullset = np.loadtxt('data/Prepped_diabetes_data.data', delimiter=',')
 
 generator1 = torch.Generator().manual_seed(42)
 generator2 = torch.Generator().manual_seed(42)
-
+torch.manual_seed(42)
 
 train_size = int(0.8 * len(fullset))
 test_size = len(fullset) - train_size
 trainset, TestSet = loader.random_split(fullset, [train_size, test_size], generator=generator1)
 
 dataLoader = loader.DataLoader(fullset)
-print(trainset.dataset[:, :8])
 
 
-X = trainset.dataset[:, :8]
-y = trainset.dataset[:,8]
+X = trainset.dataset[:][:, :8]
+y = trainset.dataset[:][:,8]
  
 X = torch.tensor(X, dtype=torch.float32)
 y = torch.tensor(y, dtype=torch.float32).reshape(-1, 1)
@@ -57,8 +56,8 @@ model.load_state_dict(torch.load("model/NewModel"))
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
-X_test = TestSet.dataset[:, :8]
-y_test = TestSet.dataset[:,8]
+X_test = TestSet.dataset[:][:, :8]
+y_test = TestSet.dataset[:][:,8]
 X_test = torch.tensor(X_test, dtype=torch.float32)
 y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 

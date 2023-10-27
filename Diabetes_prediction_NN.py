@@ -49,15 +49,14 @@ if(version == "local"):
 
 
 
-
-X = trainset.dataset[:, :8]
-y = trainset.dataset[:,8]
+X = trainset.dataset[:][:, :8]
+y = trainset.dataset[:][:,8]
  
 X = torch.tensor(X, dtype=torch.float32)
 y = torch.tensor(y, dtype=torch.float32).reshape(-1, 1)
 
-X_test = TestSet.dataset[:, :8]
-y_test = TestSet.dataset[:,8]
+X_test = TestSet.dataset[:][:, :8]
+y_test = TestSet.dataset[:][:,8]
 X_test = torch.tensor(X_test, dtype=torch.float32)
 y_test = torch.tensor(y_test, dtype=torch.int32).reshape(-1, 1)
  
@@ -76,8 +75,6 @@ model = nn.Sequential(
     nn.Sigmoid()
 )
 print(model)
-
-
 
 # train the model
 loss_fn   = nn.BCELoss()  # binary cross entropy    # np.MSELoss
@@ -102,6 +99,7 @@ for epoch in range(n_epochs):
 
 # compute accuracy (no_grad is optional)
 with torch.no_grad():
+    X_test
     y_pred = model(X_test)
     y_pred_binary = y_pred.round()
     
@@ -132,6 +130,9 @@ with torch.no_grad():
     print(f"Recall mättu: {recall}")
     print(f"Precision mättu: {precision}")
 
+
+dict = model.state_dict()
+print(model)
 if(version =="global"):
     torch.save(model.state_dict(), "model/GlobalModel")
 if(version =="local"):
