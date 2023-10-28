@@ -65,7 +65,6 @@ y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 with torch.no_grad():
     y_pred = model(X_test)
     y_pred_binary = y_pred.round()
-    print(y_test)
     accuracy = (y_pred_binary == y_test).float().mean()
     TP = ((y_pred_binary == 1) & (y_test == 1)).float().sum()
     FP = ((y_pred_binary == 1) & (y_test == 0)).float().sum()

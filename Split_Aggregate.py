@@ -70,11 +70,7 @@ def create_splits(directory_name, global_model_path, local_model_paths):
     for i, model_path in enumerate(local_model_paths):
         local_model = torch.load(model_path)
         local_model_as_vec = get_one_vec_sorted_layers(local_model)
-        print("local model as vec")
-        print(local_model_as_vec)
         restricted_local_vec = restrict_values(local_model_as_vec)    
-        print("restricted model as vec")
-        print(restricted_local_vec)
         a, b = split(restricted_local_vec)
         a_file = f'{splitted_file_dir}/A_C{i:03d}.txt'
         b_file = f'{splitted_file_dir}/B_C{i:03d}.txt'
@@ -107,8 +103,8 @@ def recover_model_from_vec(example_model, vec_to_recover, layer_names):
 def determine_aggregated_model(old_global_model_path, path_to_share1, path_to_share2):
     old_global_model = torch.load(old_global_model_path)
     layer_names = old_global_model.keys()
-    share1 = np.loadtxt(path_to_share1)
-    share2 = np.loadtxt(path_to_share2)
+    share1 = np.loadtxt(path_to_share1, dtype=np.int64)
+    share2 = np.loadtxt(path_to_share2, dtype=np.int64)
     restricted_vec = share1 + share2
 
     unrestricted_vec = unrestrict_values(torch.from_numpy(restricted_vec))

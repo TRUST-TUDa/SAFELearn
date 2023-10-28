@@ -130,11 +130,6 @@ with torch.no_grad():
     print(f"Recall mättu: {recall}")
     print(f"Precision mättu: {precision}")
 
-dicti = model.state_dict()
-for k in dicti: 
-    print(k)
-    print(dicti[k])
-
 if(version =="global"):
     torch.save(model.state_dict(), "model/GlobalModel")
 if(version =="local"):
