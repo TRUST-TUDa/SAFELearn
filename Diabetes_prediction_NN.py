@@ -18,9 +18,9 @@ if torch.cuda.is_available():
     device = torch.device("cuda")
     torch.cuda.manual_seed(42)
     torch.cuda.manual_seed_all(42)
-if torch.backends.mps.is_available():
-    device = torch.device("mps")
-    torch.mps.manual_seed(42)
+#if torch.backends.mps.is_available():
+#    device = torch.device("cpu")
+#    torch.mps.manual_seed(42)
 
 fullset = np.loadtxt('data/Prepped_diabetes_data.data', delimiter=',')
 
@@ -64,6 +64,7 @@ class DiabModel(nn.Module):
         self.linear3 = nn.Linear(10,4)
         self.linear4 = nn.Linear(4,1)
         self.act_fn = nn.ReLU()
+        self.sigm = nn.Sigmoid()
 
 
     def forward(self, x):
@@ -74,6 +75,7 @@ class DiabModel(nn.Module):
         x = self.linear3(x)
         x = self.act_fn(x)
         x = self.linear4(x)
+        x = self.sigm(x)
         return x
 
 model = DiabModel()
@@ -81,7 +83,7 @@ print(model)
 
 # train the model
 model.train()
-loss_fn   = nn.BCEWithLogitsLoss()  # binary cross entropy with a sigmoid end layer (numerically more stable)  
+loss_fn   = nn.BCELoss()  # binary cross entropy with a sigmoid end layer (numerically more stable)  
 optimizer = optim.Adam(model.parameters(), lr=0.001) 
  
 n_epochs = 100
@@ -110,8 +112,7 @@ def eval_model(model, X_test, y_test):
 
     with torch.no_grad():
         y_pred = model(X_test)
-        y_pred_binary = y_pred.round()
-        
+        y_pred_binary = y_pred.round().cpu().numpy()
         precision_sklm = sklm.precision_score(y_test, y_pred_binary)
         recall_sklm = sklm.recall_score(y_test, y_pred_binary)
         f1score_sklm = sklm.f1_score(y_test, y_pred_binary)
