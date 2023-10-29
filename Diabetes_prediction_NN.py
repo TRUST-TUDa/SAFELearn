@@ -7,7 +7,7 @@ import sys as sys
 import sklearn.metrics as sklm
 
 if(len(sys.argv)==1):
-    print("For GlobalModel use: python3", sys.argv[0], "global\nFor LocalModel use: python3", sys.argv[0], "local")
+    print("For GlobalModel use: python3", sys.argv[0], "global\nFor LocalModel use: python3", sys.argv[0], "local\nFor evaluation use: python3", sys.argv[0], "eval")
     quit()
 
 version = sys.argv[1]
@@ -18,17 +18,16 @@ if torch.cuda.is_available():
     device = torch.device("cuda")
     torch.cuda.manual_seed(42)
     torch.cuda.manual_seed_all(42)
-#if torch.backends.mps.is_available():
+#if torch.backends.mps.is_available(): # currently the mps device seems to be much slower than the cpu so its commented out
 #    device = torch.device("cpu")
 #    torch.mps.manual_seed(42)
 
+print("Device:", device)
 fullset = np.loadtxt('data/Prepped_diabetes_data.data', delimiter=',')
 
 generator1 = torch.Generator().manual_seed(42)
 generator2 = torch.Generator().manual_seed(42)
 torch.manual_seed(42)
-
-#data_loader = data.DataLoader(fullset, batch_size=100, shuffle=True)
 
 set_size = int(0.5 * len(fullset))
 SetGlobal, SetLocal = data.random_split(fullset, [set_size, set_size], generator=generator1)
@@ -36,13 +35,12 @@ SetGlobal, SetLocal = data.random_split(fullset, [set_size, set_size], generator
 train_size = int(0.8 * len(SetGlobal))
 test_size = len(SetGlobal) - train_size
 
-if(version == "global"):
+if(version == "global" or version == "eval"):
     trainset, TestSet = data.random_split(SetGlobal, [train_size, test_size], generator=generator1)
     dataLoader = data.DataLoader(SetGlobal)
 if(version == "local"):
     trainset, TestSet = data.random_split(SetLocal, [train_size, test_size], generator=generator2)
     dataLoader = data.DataLoader(SetLocal)
-
 
 
 X_train = trainset.dataset[:][:, :8]
@@ -79,21 +77,22 @@ class DiabModel(nn.Module):
         return x
 
 model = DiabModel()
-print(model)
+if (sys.argv[1]== "eval"):
+    model.load_state_dict(torch.load("model/NewModel"))
+else: 
+    print(model)
 
-# train the model
-model.train()
 loss_fn   = nn.BCELoss()  # binary cross entropy with a sigmoid end layer (numerically more stable)  
 optimizer = optim.Adam(model.parameters(), lr=0.001) 
  
 n_epochs = 100
 batch_size = 64
 
-model.to(device)
+
 
 def train_model(model,optimizer, X_train, y_train, loss_fn, n_epochs=100):
     model.train()
- 
+    model.to(device)
     for epoch in range(n_epochs):
         for i in range(0, len(X_train), batch_size): # make this random
             Xbatch = X_train[i:i+batch_size].to(device)
@@ -104,8 +103,8 @@ def train_model(model,optimizer, X_train, y_train, loss_fn, n_epochs=100):
             loss.backward() # Backpropagation
             optimizer.step() # Update parameters
         print(f'Finished epoch {epoch}, latest loss {loss}')
-
-train_model(model,optimizer,X_train,y_train,loss_fn, n_epochs)
+if (not sys.argv[1]=="eval"):
+    train_model(model,optimizer,X_train,y_train,loss_fn, n_epochs)
 
 def eval_model(model, X_test, y_test):
     model.eval()
