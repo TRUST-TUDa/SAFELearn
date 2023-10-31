@@ -29,6 +29,7 @@ OUTPUT_NUMBER_TYPE *aggregate_models(MPCParty &party, uint32_t bitlen, size_t nu
             summed_updates = ac->PutADDGate(summed_updates, update);
         }
     }
+    ac->PutMULGate(summed_updates, update);
     ArithmeticShare aggregated_update = perform_division(bitlen, number_of_elements, ac, yc, updates->size(),
                                                          summed_updates);
     ArithmeticShare aggregated_model = ac->PutADDGate(aggregated_update, global_model);
