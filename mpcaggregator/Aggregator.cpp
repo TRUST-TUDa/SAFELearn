@@ -26,7 +26,7 @@ OUTPUT_NUMBER_TYPE *aggregate_models(MPCParty &party, uint32_t bitlen, size_t nu
 
     for (const auto &update : *updates)
     {
-        ArithmeticShare curr = ac->PutMULGate(update, q_vals[i]);
+        ArithmeticShare curr = ac->PutMULGate(update, q_vals[i++]);
         if (is_first_update) {
             summed_updates = curr;
             is_first_update = false;

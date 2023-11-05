@@ -66,8 +66,8 @@ OUTPUT_NUMBER_TYPE *aggregate_models(e_role role, const string &address, uint16_
 
     auto *q_vals_vecs = new ArithmeticShare[number_of_entries];
 
-    for (uint32_t i = 0; i < number_of_entries; i++){
-        q_vals_vecs[i] = arithmetic_circuit->PutSIMDCONSGate(number_of_entries, q_vals[i], BIT_LENGTH);
+    for (uint32_t i = 0; i < local_models->size(); i++){
+        q_vals_vecs[i] = arithmetic_circuit->PutSIMDCONSGate(local_models->size(), q_vals[i], BIT_LENGTH);
     }
 
     ArithmeticShare global_model_share = arithmetic_circuit->PutSIMDINGate(number_of_entries, global_model, BIT_LENGTH, SERVER);
