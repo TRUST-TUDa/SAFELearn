@@ -16,7 +16,6 @@ bool is_file_existing(const string &file_name) {
     return result;
 }
 
-
 tuple<uint32_t, NUMBER_TYPE *> read_first_model(string directory, ROLE_TYPE role) {
 
     string file_name = str(format("%s%s_C000.txt") % directory % role);
