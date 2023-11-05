@@ -127,7 +127,7 @@ public:
     SharingClass PutMULGate(const SharingClass &s1, const SharingClass &s2)
     {
         enforce_compability(s1, s2);
-        share *result = actual_circuit->PutMulGate(s1->content, s2->content);
+        share *result = actual_circuit->PutMULGate(s1->content, s2->content);
         update_max_length(result);
         SharingClass typed_result = create_new_typed_share(result);
         do_qa(typed_result, s1->content->get_nvals());

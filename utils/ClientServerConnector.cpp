@@ -83,6 +83,14 @@ NUMBER_TYPE *read_global_model(string directory, uint32_t number_of_entries) {
 
 }
 
+NUMBER_TYPE *read_q_vals(string directory, uint32_t number_of_entries) {
+
+    string file_name = str(format("%sq_vals.txt") % directory);
+    cout << "Read Q-values from: " << file_name << endl;
+    return read_model(file_name, number_of_entries);
+
+}
+
 
 void save_model(uint32_t number_of_entries_per_model, const string &file_name, OUTPUT_NUMBER_TYPE *model) {
     auto *signed_model = (SIGNED_OUTPUT_NUMBER_TYPE *) model;

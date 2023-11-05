@@ -39,7 +39,7 @@ NUMBER_TYPE *create_tmp_update_storage(uint32_t number_of_entries)
 OUTPUT_NUMBER_TYPE *aggregate_models(e_role role, const string &address, uint16_t port, seclvl seclvl,
                                      e_mt_gen_alg mt_alg, NUMBER_TYPE *global_model,
                                      vector<NUMBER_TYPE *> *local_models,
-                                     uint32_t number_of_entries)
+                                     uint32_t number_of_entries, NUMBER_TYPE *q_vals)
 {
 
     cout << get_time_as_string() << "Good Morning (bitlen=" << BIT_LENGTH << ")" << endl;
@@ -64,11 +64,11 @@ OUTPUT_NUMBER_TYPE *aggregate_models(e_role role, const string &address, uint16_
     }
     delete[] tmp_update_storage;
 
-    ArithmeticShare global_model_share = arithmetic_circuit->PutSIMDINGate(number_of_entries, global_model, BIT_LENGTH,
-                                                                           SERVER);
+    ArithmeticShare global_model_share = arithmetic_circuit->PutSIMDINGate(number_of_entries, global_model, BIT_LENGTH,SERVER);
+    ArithmeticShare q_val_share = arithmetic_circuit->PutSIMDINGate(number_of_entries, q_vals, BIT_LENGTH,SERVER);                   
 
     OUTPUT_NUMBER_TYPE *aggregated_update = aggregate_models(party, BIT_LENGTH, number_of_entries, &clipped_updates,
-                                                             arithmetic_circuit, yao_circuit, global_model_share, q_vals);
+                                                             arithmetic_circuit, yao_circuit, global_model_share, q_val_share);
 
     auto plain_text_aggregated_update_shares = new vector<tuple<int32_t, OUTPUT_NUMBER_TYPE *>>();
     vector<size_t> client_numbers;
