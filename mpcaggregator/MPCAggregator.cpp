@@ -36,7 +36,7 @@ NUMBER_TYPE *create_tmp_update_storage(uint32_t number_of_entries)
     return new NUMBER_TYPE[number_of_entries];
 }
 
-OUTPUT_NUMBER_TYPE *aggregate_models(e_role role, const string &address, uint16_t port, seclvl seclvl,
+OUTPUT_NUMBER_TYPE *xaggregate_models(e_role role, const string &address, uint16_t port, seclvl seclvl,
                                      e_mt_gen_alg mt_alg, NUMBER_TYPE *global_model,
                                      vector<NUMBER_TYPE *> *local_models,
                                      uint32_t number_of_entries, NUMBER_TYPE *q_vals)
@@ -67,7 +67,7 @@ OUTPUT_NUMBER_TYPE *aggregate_models(e_role role, const string &address, uint16_
     auto *q_vals_vecs = new ArithmeticShare[number_of_entries];
 
     for (uint32_t i = 0; i < local_models->size(); i++){
-        q_vals_vecs[i] = arithmetic_circuit->PutSIMDCONSGate(local_models->size(), q_vals[i], BIT_LENGTH);
+        q_vals_vecs[i] = arithmetic_circuit->PutSIMDCONSGate(number_of_entries, q_vals[i], BIT_LENGTH);
     }
 
     ArithmeticShare global_model_share = arithmetic_circuit->PutSIMDINGate(number_of_entries, global_model, BIT_LENGTH, SERVER);
