@@ -63,7 +63,7 @@ _Float64 *read_q(const string &file_name, uint32_t number_of_entries) {
     }
     assert(next_entry_to_read == number_of_entries);
 
-    return (NUMBER_TYPE *) result;
+    return (_Float64 *) result;
 }
 
 
