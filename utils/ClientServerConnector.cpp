@@ -16,7 +16,6 @@ bool is_file_existing(const string &file_name) {
     return result;
 }
 
-
 tuple<uint32_t, NUMBER_TYPE *> read_first_model(string directory, ROLE_TYPE role) {
 
     string file_name = str(format("%s%s_C000.txt") % directory % role);
@@ -50,6 +49,23 @@ NUMBER_TYPE *read_model(const string &file_name, uint32_t number_of_entries) {
     return (NUMBER_TYPE *) result;
 }
 
+_Float64 *read_q(const string &file_name, uint32_t number_of_entries) {
+
+    auto *result = new SIGNED_NUMBER_TYPE[number_of_entries];
+    uint32_t next_entry_to_read = 0;
+
+    std::fstream input_file(file_name, std::ios_base::in);
+    SIGNED_NUMBER_TYPE a;
+    while (input_file >> a) {
+        assert(next_entry_to_read < number_of_entries);
+        result[next_entry_to_read] = a;
+        next_entry_to_read++;
+    }
+    assert(next_entry_to_read == number_of_entries);
+
+    return (_Float64 *) result;
+}
+
 
 tuple<uint32_t, vector<NUMBER_TYPE *> *> read_local_models(string directory, ROLE_TYPE role,
                                                            size_t max_models_to_read) {
@@ -81,6 +97,13 @@ NUMBER_TYPE *read_global_model(string directory, uint32_t number_of_entries) {
     cout << "Read global model from: " << file_name << endl;
     return read_model(file_name, number_of_entries);
 
+}
+
+_Float64 *read_q_vals(string directory, uint32_t number_of_entries) {
+
+    string file_name = str(format("%sq_vals.txt") % directory);
+    cout << "Read Q-values from: " << file_name << endl;
+    return read_q(file_name, number_of_entries);
 }
 
 
