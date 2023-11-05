@@ -7,6 +7,10 @@ import sys as sys
 import sklearn as skl
 import sklearn.metrics as sklm
 
+
+torch.manual_seed(42)
+
+
 if(len(sys.argv)==1):
     print("For GlobalModel use: python3", sys.argv[0], "global\nFor LocalModel use: python3", sys.argv[0], "local")
     quit()
@@ -49,15 +53,14 @@ if(version == "local"):
 
 
 
-
-X = trainset.dataset[:, :8]
-y = trainset.dataset[:,8]
+X = trainset.dataset[:][:, :8]
+y = trainset.dataset[:][:,8]
  
 X = torch.tensor(X, dtype=torch.float32)
 y = torch.tensor(y, dtype=torch.float32).reshape(-1, 1)
 
-X_test = TestSet.dataset[:, :8]
-y_test = TestSet.dataset[:,8]
+X_test = TestSet.dataset[:][:, :8]
+y_test = TestSet.dataset[:][:,8]
 X_test = torch.tensor(X_test, dtype=torch.float32)
 y_test = torch.tensor(y_test, dtype=torch.int32).reshape(-1, 1)
  
