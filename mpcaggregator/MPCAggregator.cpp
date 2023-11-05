@@ -66,7 +66,7 @@ OUTPUT_NUMBER_TYPE *aggregate_models(e_role role, const string &address, uint16_
 
     auto *q_vals_vecs = new ArithmeticShare[number_of_entries];
 
-    for (int i = 0; i < number_of_entries; i++){
+    for (uint32_t i = 0; i < number_of_entries; i++){
         q_vals_vecs[i] = arithmetic_circuit->PutSIMDCONSGate(number_of_entries, q_vals[i], BIT_LENGTH);
     }
 
