@@ -85,7 +85,7 @@ int main(int argc, char **argv)
     assert(!models_of_client->empty());
     assert(models_of_client->size() <= n);
     NUMBER_TYPE *global_model = read_global_model(directory, entries_per_model);
-    NUMBER_TYPE *q_vals = read_q_vals(directory, models_of_client->size());
+    _Float64 *q_vals = read_q_vals(directory, models_of_client->size());
 
     if (real_parameters <= 0)
     {
