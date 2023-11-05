@@ -94,8 +94,6 @@ int main(int argc, char **argv)
              << ")" << endl;
         entries_per_model = real_parameters;
     }
-    // TODO insert all q_values into 1 vector of type NUMBER_TYPE
-
     OUTPUT_NUMBER_TYPE *aggregated_model = aggregate_models(mpc_role, address, port, seclvl, mt_alg, global_model,
                                                             models_of_client, entries_per_model, q_vals);
     cout << get_time_as_string() << "Aggregation Component is Done" << endl;

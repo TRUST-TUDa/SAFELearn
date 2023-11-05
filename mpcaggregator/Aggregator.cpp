@@ -18,20 +18,23 @@ ArithmeticShare perform_division(uint32_t bitlen, size_t number_of_elements, Typ
 
 OUTPUT_NUMBER_TYPE *aggregate_models(MPCParty &party, uint32_t bitlen, size_t number_of_elements,
                                      vector<ArithmeticShare> *updates, TypedArithmeticCircuit &ac, TypedYaoCircuit &yc,
-                                     const ArithmeticShare &global_model, const ArithmeticShare q_vals) {
+                                     const ArithmeticShare &global_model, vector<ArithmeticShare> *q_vals) {
     ArithmeticShare summed_updates = ac->createDummyShare();
     bool is_first_update = true;
-    for (const auto &update:*updates) {
+
+    int i = 0;
+
+    for (const auto &update : *updates)
+    {
         if (is_first_update) {
             summed_updates = update;
+            ac->PutMULGate(summed_updates, q_vals[i++]);
             is_first_update = false;
         } else {
             summed_updates = ac->PutADDGate(summed_updates, update);
         }
     }
-    cout << "summed_updates before mul: " << summed_updates->content << endl;
-    summed_updates = ac->PutMULGate(summed_updates, q_vals);
-    cout << "summed_updates after mul: " << summed_updates->content << endl;
+    //summed_updates = ac->PutMULGate(summed_updates, q_vals);
     ArithmeticShare aggregated_update = perform_division(bitlen, number_of_elements, ac, yc, updates->size(),
                                                          summed_updates);
     ArithmeticShare aggregated_model = ac->PutADDGate(aggregated_update, global_model);

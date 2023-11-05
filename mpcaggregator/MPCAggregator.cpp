@@ -64,8 +64,14 @@ OUTPUT_NUMBER_TYPE *aggregate_models(e_role role, const string &address, uint16_
     }
     delete[] tmp_update_storage;
 
+    vector<ArithmeticShare> q_vals_vecs;
+    q_vals_vecs.reserve(number_of_entries);
+
     ArithmeticShare global_model_share = arithmetic_circuit->PutSIMDINGate(number_of_entries, global_model, BIT_LENGTH,SERVER);
     ArithmeticShare q_val_share = arithmetic_circuit->PutSIMDINGate(number_of_entries, q_vals, BIT_LENGTH,SERVER);                   
+    
+
+
 
     OUTPUT_NUMBER_TYPE *aggregated_update = aggregate_models(party, BIT_LENGTH, number_of_entries, &clipped_updates,
                                                              arithmetic_circuit, yao_circuit, global_model_share, q_val_share);
