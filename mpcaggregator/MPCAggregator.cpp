@@ -39,7 +39,7 @@ NUMBER_TYPE *create_tmp_update_storage(uint32_t number_of_entries)
 OUTPUT_NUMBER_TYPE *aggregate_models(e_role role, const string &address, uint16_t port, seclvl seclvl,
                                      e_mt_gen_alg mt_alg, NUMBER_TYPE *global_model,
                                      vector<NUMBER_TYPE *> *local_models,
-                                     uint32_t number_of_entries, _Float64 *q_vals)
+                                     uint32_t number_of_entries, NUMBER_TYPE *q_vals)
 {
 
     cout << get_time_as_string() << "Good Morning (bitlen=" << BIT_LENGTH << ")" << endl;

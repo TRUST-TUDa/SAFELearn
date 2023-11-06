@@ -49,7 +49,7 @@ NUMBER_TYPE *read_model(const string &file_name, uint32_t number_of_entries) {
     return (NUMBER_TYPE *) result;
 }
 
-_Float64 *read_q(const string &file_name, uint32_t number_of_entries) {
+NUMBER_TYPE *read_q(const string &file_name, uint32_t number_of_entries) {
 
     auto *result = new SIGNED_NUMBER_TYPE[number_of_entries];
     uint32_t next_entry_to_read = 0;
@@ -63,7 +63,7 @@ _Float64 *read_q(const string &file_name, uint32_t number_of_entries) {
     }
     assert(next_entry_to_read == number_of_entries);
 
-    return (_Float64 *) result;
+    return (NUMBER_TYPE *) result;
 }
 
 
@@ -99,7 +99,7 @@ NUMBER_TYPE *read_global_model(string directory, uint32_t number_of_entries) {
 
 }
 
-_Float64 *read_q_vals(string directory, uint32_t number_of_entries) {
+NUMBER_TYPE *read_q_vals(string directory, uint32_t number_of_entries) {
 
     string file_name = str(format("%sq_vals.txt") % directory);
     cout << "Read Q-values from: " << file_name << endl;
