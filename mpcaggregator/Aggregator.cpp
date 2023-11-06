@@ -36,7 +36,9 @@ OUTPUT_NUMBER_TYPE *aggregate_models(MPCParty &party, uint32_t bitlen, size_t nu
 
     for (const auto &update : *updates)
     {
+        ac->PutPrintValueGate(update, "update without div");
         ArithmeticShare curr = perform_division(ac, yc, update, q_vals[i++]);
+        ac->PutPrintValueGate(curr, "quotient");
         if (is_first_update) {
             summed_updates = curr;
             is_first_update = false;
