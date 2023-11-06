@@ -57,8 +57,8 @@ TypedYaoCircuit &yc){
             summed_updates = ac->PutADDGate(summed_updates, update); 
         }
     }
-    ArithmeticShare aggregated_update = perform_division(bitlen, number_of_elements, ac, yc, updates->size(),
-                                                     summed_updates);
+    ArithmeticShare divisor = ac->PutSIMDCONSGate(number_of_elements, updates->size(), bitlen);
+    ArithmeticShare aggregated_update = perform_division(bitlen, number_of_elements, ac, yc, summed_updates, divisor);
     return aggregated_update;
 }
 
