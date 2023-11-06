@@ -16,15 +16,21 @@ ArithmeticShare perform_division_average(uint32_t bitlen, size_t number_of_eleme
     return ac->PutMUXGate(inverse_aggregated_update, aggregated_abs_update_a, is_negative);
 }
 
-ArithmeticShare perform_division(TypedArithmeticCircuit &ac,
+ArithmeticShare perform_division(uint32_t bitlen,TypedArithmeticCircuit &ac,
                                  TypedYaoCircuit &yc, const ArithmeticShare &dividend, const ArithmeticShare &divisor) {
+    size_t boundary_for_negative_values = (1U << (bitlen - 1)) - 1;
+    auto boundary_for_negative_values_a = ac->PutSIMDCONSGate(1, boundary_for_negative_values, bitlen);
+    auto inverse_update = ac->PutINVGate(dividend);
+    auto is_negative = ac->PutGTGate(dividend, boundary_for_negative_values_a);
+    auto abs_values = ac->PutMUXGate(inverse_update, dividend, is_negative);
 
-    YaoShare dividend_y = yc->PutA2YGate(dividend);
+    YaoShare dividend_y = yc->PutA2YGate(abs_values);
     auto divisor_y = yc->PutA2YGate(divisor);
     auto quotient_y = yc->divide(dividend_y, divisor_y);
-    return ac->PutY2AGate(quotient_y);
+    auto quotient_a = ac->PutY2AGate(quotient_y);
+    auto inverse_quotient = ac->PutINVGate(quotient_a);
+    return ac->PutMUXGate(inverse_quotient, quotient_a, is_negative);
 }
-
 
 OUTPUT_NUMBER_TYPE *aggregate_models(MPCParty &party, uint32_t bitlen, size_t number_of_elements,
                                      vector<ArithmeticShare> *updates, TypedArithmeticCircuit &ac, TypedYaoCircuit &yc,
@@ -37,7 +43,7 @@ OUTPUT_NUMBER_TYPE *aggregate_models(MPCParty &party, uint32_t bitlen, size_t nu
     for (const auto &update : *updates)
     {
         ac->PutPrintValueGate(update, "update without div");
-        ArithmeticShare curr = perform_division(ac, yc, update, q_vals[i++]);
+        ArithmeticShare curr = perform_division(bitlen,ac, yc, update, q_vals[i++]);
         ac->PutPrintValueGate(curr, "quotient");
         if (is_first_update) {
             summed_updates = curr;
