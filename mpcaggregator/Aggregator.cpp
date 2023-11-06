@@ -24,6 +24,14 @@ ArithmeticShare perform_division(uint32_t bitlen, size_t number_of_elements, Typ
     return ac->PutMUXGate(inverse_quotient, quotient_a, is_negative);
 }
 
+/// @brief calculates the weighted average over all the updates according to the weights (q_values)
+/// @param bitlen bitlen of the shares
+/// @param number_of_elements the number of elements each share has
+/// @param updates a vector of all updates as arithmetic shares
+/// @param ac the arithmetic circuit
+/// @param yc the yao circuit
+/// @param q_vals an array of the weights as arithmetic shares for each update
+/// @return the weighted average over all updates according to the weights. 
 ArithmeticShare weighted_average_over_updates(uint32_t bitlen, size_t number_of_elements, vector<ArithmeticShare> *updates, TypedArithmeticCircuit &ac,
 TypedYaoCircuit &yc, const ArithmeticShare * q_vals){
     ArithmeticShare summed_updates = ac->createDummyShare();
@@ -43,6 +51,13 @@ TypedYaoCircuit &yc, const ArithmeticShare * q_vals){
     return summed_updates;
 }
 
+/// @brief calculates the normal unweighted average over all update shares
+/// @param bitlen the bitlen of the shares
+/// @param number_of_elements the number of element each share has
+/// @param updates a vector of all updates as arithmetic shares
+/// @param ac the arithmetic circuit
+/// @param yc the yao circuit
+/// @return the unweighted average over all update shares. 
 ArithmeticShare average_over_updates(uint32_t bitlen, size_t number_of_elements, vector<ArithmeticShare> *updates, TypedArithmeticCircuit &ac,
 TypedYaoCircuit &yc){
     ArithmeticShare summed_updates = ac->createDummyShare();
@@ -63,21 +78,22 @@ TypedYaoCircuit &yc){
 }
 
 
-/// @brief performs the 
-/// @param party 
-/// @param bitlen 
-/// @param number_of_elements 
-/// @param updates 
-/// @param ac 
-/// @param yc 
-/// @param global_model 
-/// @param q_vals 
-/// @return 
+/// @brief updates 
+/// @param party the mpc party 
+/// @param bitlen the bitlen of the shares
+/// @param number_of_elements the number of element each share has
+/// @param updates a vector of all updates as arithmetic shares
+/// @param ac the arithmetic circuit
+/// @param yc the yao circuit
+/// @param global_model the global model 
+/// @param q_vals the weights (used for weighted average)
+/// @return The update as OUTPUT_NUMBER_TYPE
 OUTPUT_NUMBER_TYPE *aggregate_models(MPCParty &party, uint32_t bitlen, size_t number_of_elements,
                                      vector<ArithmeticShare> *updates, TypedArithmeticCircuit &ac, TypedYaoCircuit &yc,
                                      const ArithmeticShare &global_model, const ArithmeticShare * q_vals) {
-    ArithmeticShare weighted_average = weighted_average_over_updates(bitlen, number_of_elements, updates, ac, yc, q_vals);
-    ArithmeticShare aggregated_model = ac->PutADDGate(weighted_average, global_model);
+    ArithmeticShare average = weighted_average_over_updates(bitlen, number_of_elements, updates, ac, yc, q_vals);
+    //ArithmeticShare average = average_over_updates(bitlen, number_of_elements, updates, ac, yc); -- use this if normal average is needed instead of weighted one
+    ArithmeticShare aggregated_model = ac->PutADDGate(average, global_model);
     UntypedSharedOutputShare output_share = ac->PutSharedOUTGate(aggregated_model);
     party->ExecCircuit("Aggregation");
     uint32_t actual_bitlen, actual_number_of_elements;
