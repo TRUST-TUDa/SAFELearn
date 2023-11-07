@@ -65,12 +65,17 @@ def eval_model(model, X_test, y_test):
         y_pred = model(X_test)
         y_pred_binary = y_pred.round().cpu().numpy()
         precision_sklm = sklm.precision_score(y_test, y_pred_binary)
+        precision_sklm_inv = sklm.precision_score(y_pred_binary, y_test)
         recall_sklm = sklm.recall_score(y_test, y_pred_binary)
+        recall_sklm_inv = sklm.recall_score(y_pred_binary,y_test)
         f1score_sklm = sklm.f1_score(y_test, y_pred_binary)
+        f1score_sklm = sklm.f1_score(y_pred_binary,y_test)
         accuracy_sklm = sklm.accuracy_score(y_test, y_pred_binary)
 
         print("precision: ", precision_sklm)
+        print("precision inv:", precision_sklm_inv)
         print("recall: ", recall_sklm)
+        print("recall: inv", recall_sklm_inv)
         print("f1-score: ", f1score_sklm)
         print("accuracy: ", accuracy_sklm)
 
