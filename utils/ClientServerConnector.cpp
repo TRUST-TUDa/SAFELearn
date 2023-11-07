@@ -116,6 +116,7 @@ NUMBER_TYPE *read_q_vals(string directory, uint32_t number_of_entries) {
                 new_file << 1 << endl;
             }
             new_file.close();
+            return read_q(file_name, number_of_entries);
         }
         else {
             cout << "Failed to create: " << file_name << endl;
