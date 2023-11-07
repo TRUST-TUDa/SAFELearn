@@ -106,6 +106,7 @@ def determine_aggregated_model(old_global_model_path, path_to_share1, path_to_sh
     share1 = np.loadtxt(path_to_share1, dtype=np.int64)
     share2 = np.loadtxt(path_to_share2, dtype=np.int64)
     restricted_vec = share1 + share2
+    np.savetxt("./data/Aggregated/combined", restricted_vec, fmt='%d')
 
     unrestricted_vec = unrestrict_values(torch.from_numpy(restricted_vec))
     return recover_model_from_vec(old_global_model, unrestricted_vec, layer_names)
