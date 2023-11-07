@@ -113,10 +113,15 @@ def determine_aggregated_model(old_global_model_path, path_to_share1, path_to_sh
 if (len(sys.argv) >1 and sys.argv[1] == "split"):
     print("Splitting to data/MyTestDir")
     localmodelpaths = []
-    localmodelpaths.append("./model/LocalModel")
+    for i in range(10000):
+        if os.path.exists(f"model/Model_{i}"):
+            localmodelpaths.append(f"model/Model_{i}")
+        else: 
+            break
+        
     create_splits("MyTestDir","./model/GlobalModel",localmodelpaths)
 
-newModelPath = "./model/NewModel"
+newModelPath = "./model/GlobalModel"
 if (len(sys.argv) >1 and sys.argv[1] == "combine"):
     print("Aggregating! - new model will be saved at", newModelPath)
     newmodel = determine_aggregated_model("./model/GlobalModel", "./data/Aggregated/AggregatedModel_A.txt", "./data/Aggregated/AggregatedModel_B.txt")
