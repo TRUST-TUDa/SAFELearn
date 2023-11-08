@@ -12,6 +12,12 @@
 
 using namespace std;
 
+/// @brief determines the actual update -> subtracts the global from the SERVER split. 
+/// @param global array of the numbers of the global model
+/// @param local array of the numbers of one of the splits of the local model
+/// @param result array where the result should be stored
+/// @param number_of_entries the lenght of arrays of the models
+/// @param add_zero true for the CLIENT, false for the SERVER
 void determine_update(const NUMBER_TYPE *global, const NUMBER_TYPE *local, NUMBER_TYPE *result,
                       uint32_t number_of_entries, bool add_zero)
 {

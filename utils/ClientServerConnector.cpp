@@ -102,8 +102,27 @@ NUMBER_TYPE *read_global_model(string directory, uint32_t number_of_entries) {
 NUMBER_TYPE *read_q_vals(string directory, uint32_t number_of_entries) {
 
     string file_name = str(format("%sq_vals.txt") % directory);
-    cout << "Read Q-values from: " << file_name << endl;
-    return read_q(file_name, number_of_entries);
+    
+    if (is_file_existing(file_name)){
+        cout << "Read Q-values from: " << file_name << endl;
+        return read_q(file_name, number_of_entries);
+    }
+    else {
+        cout << "create Q-values all 1: " << file_name << endl;
+        ofstream new_file(file_name.c_str());
+        if (new_file.is_open()){
+
+            for (uint32_t i = 0; i < number_of_entries; i++){
+                new_file << 1 << endl;
+            }
+            new_file.close();
+            return read_q(file_name, number_of_entries);
+        }
+        else {
+            cout << "Failed to create: " << file_name << endl;
+            return nullptr;
+        }
+    }
 }
 
 

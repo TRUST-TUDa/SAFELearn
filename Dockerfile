@@ -34,7 +34,7 @@ RUN python3 -m pip install numpy && python3 -m pip install scikit-learn
 RUN python3 -m pip install scikit-learn
 
 # Allow colors in bash
-RUN echo 'PS1="\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> /root/.bashrc \
+RUN echo 'PS1="\[\033[1;36m\]\h \[\033[1;34m\]\W\[\033[0;35m\] \[\033[1;36m\]# \[\033[0m\]"' >> /root/.bashrc \
     && echo "alias ls=\"ls --color=auto\"" >> /root/.bashrc \
     && echo "alias python=\"python3\"" >> /root/.bashrc
 
