@@ -82,8 +82,11 @@ def eval_model(model, X_test, y_test):
 
 # if the global model does not yet exist create a new fully untrained one
 if not os.path.exists("model/GlobalModel"):
+    print("Creating new GlobalModel!")
     model = DiabModel()
     torch.save(model.state_dict(), f"model/GlobalModel") 
+else:
+    print("Loading existing GlobalModel") # the actual loading is done within the training for each client
 
 
 if (len(sys.argv) == 1):
