@@ -18,7 +18,9 @@ version = sys.argv[1]
 
 # determine device (for gpu support)
 device = torch.device("cpu")
-if torch.cuda.is_available():
+
+#Cuda/gpu was slower than cpu. Presumably due to the small size of the NN
+#if torch.cuda.is_available():
     device = torch.device("cuda")
     torch.cuda.manual_seed(42)
     torch.cuda.manual_seed_all(42)
@@ -50,13 +52,13 @@ if(version == "local"):
 X_train = trainset.dataset[:][:, :8]
 y_train = trainset.dataset[:][:,8]
  
-X_train = torch.tensor(X_train, dtype=torch.float32)
-y_train = torch.tensor(y_train, dtype=torch.float32).reshape(-1, 1)
+X_train = torch.tensor(X_train, dtype=torch.float32, device=device)
+y_train = torch.tensor(y_train, dtype=torch.float32, device=device).reshape(-1, 1)
 
 X_test = TestSet.dataset[:][:, :8]
 y_test = TestSet.dataset[:][:,8]
-X_test = torch.tensor(X_test, dtype=torch.float32)
-y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
+X_test = torch.tensor(X_test, dtype=torch.float32, device=device)
+y_test = torch.tensor(y_test, dtype=torch.float32, device=device).reshape(-1, 1)
 
 class DiabModel(nn.Module):
     def __init__(self):
@@ -116,6 +118,7 @@ def eval_model(model, X_test, y_test):
     with torch.no_grad():
         y_pred = model(X_test)
         y_pred_binary = y_pred.round().cpu().numpy()
+        y_test = y_test.cpu().numpy()
         precision_sklm = sklm.precision_score(y_test, y_pred_binary)
         recall_sklm = sklm.recall_score(y_test, y_pred_binary)
         f1score_sklm = sklm.f1_score(y_test, y_pred_binary)
