@@ -119,7 +119,7 @@ if (len(sys.argv) == 1):
                     optimizer.zero_grad()
                     loss.backward()
                     optimizer.step()
-                print(f'Client{client_index}, Epoch {epoch}, latest loss {loss}')
+                print(f'Client {client_index}, Epoch {epoch}, latest loss {loss}')
             torch.save(model.state_dict(), f"model/Model_{client_index}")
         train_model(model, optimizer, X_train, y_train, loss_fn, n_epochs)
         eval_model(model, X_test, y_test)
