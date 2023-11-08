@@ -138,6 +138,7 @@ void save_model(uint32_t number_of_entries_per_model, const string &file_name, O
         }
         ofile << signed_model[i];
     }
+    ofile << std::endl;
     ofile.close();
 }
 
