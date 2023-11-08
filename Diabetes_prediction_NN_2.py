@@ -23,14 +23,14 @@ generator = torch.Generator().manual_seed(42)
 torch.manual_seed(42)
 
 set_size = len(fullset)
-splits = []
+clients = []
 
 NUMBER_OF_SPLITS  = 5
 # Split the data into 100 non-overlapping parts
 split_size = len(fullset) // NUMBER_OF_SPLITS
 for i in range(NUMBER_OF_SPLITS):
     split = fullset[i * split_size: (i + 1) * split_size]
-    splits.append(split)
+    clients.append(split)
 
 n_epochs = 100
 batch_size = 64
@@ -90,7 +90,7 @@ else:
 
 
 if (len(sys.argv) == 1):
-    for split_index, split_data in enumerate(splits):
+    for client_index, split_data in enumerate(clients):
         train_size = int(0.8 * len(split_data))
         test_size = len(split_data) - train_size
         train_data, test_data = data.random_split(split_data, [train_size, test_size], generator=generator)
@@ -119,8 +119,8 @@ if (len(sys.argv) == 1):
                     optimizer.zero_grad()
                     loss.backward()
                     optimizer.step()
-                print(f'Split {split_index}, Epoch {epoch}, latest loss {loss}')
-            torch.save(model.state_dict(), f"model/Model_{split_index}")
+                print(f'Client{client_index}, Epoch {epoch}, latest loss {loss}')
+            torch.save(model.state_dict(), f"model/Model_{client_index}")
         train_model(model, optimizer, X_train, y_train, loss_fn, n_epochs)
         eval_model(model, X_test, y_test)
 # if a cli argument is given only evaluate
