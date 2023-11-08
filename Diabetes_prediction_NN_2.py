@@ -25,10 +25,10 @@ torch.manual_seed(42)
 set_size = len(fullset)
 clients = []
 
-NUMBER_OF_SPLITS  = 5
+NUMBER_OF_CLIENTS  = 5
 # Split the data into 100 non-overlapping parts
-split_size = len(fullset) // NUMBER_OF_SPLITS
-for i in range(NUMBER_OF_SPLITS):
+split_size = len(fullset) // NUMBER_OF_CLIENTS
+for i in range(NUMBER_OF_CLIENTS):
     split = fullset[i * split_size: (i + 1) * split_size]
     clients.append(split)
 
