@@ -23,13 +23,14 @@ generator = torch.Generator().manual_seed(42)
 torch.manual_seed(42)
 
 set_size = len(fullset)
-splits = []
+clients = []
 
+NUMBER_OF_CLIENTS  = 5
 # Split the data into 100 non-overlapping parts
-split_size = len(fullset) // 100
-for i in range(100):
+split_size = len(fullset) // NUMBER_OF_CLIENTS
+for i in range(NUMBER_OF_CLIENTS):
     split = fullset[i * split_size: (i + 1) * split_size]
-    splits.append(split)
+    clients.append(split)
 
 n_epochs = 100
 batch_size = 64
@@ -65,28 +66,26 @@ def eval_model(model, X_test, y_test):
         y_pred = model(X_test)
         y_pred_binary = y_pred.round().cpu().numpy()
         precision_sklm = sklm.precision_score(y_test, y_pred_binary)
-        precision_sklm_inv = sklm.precision_score(y_pred_binary, y_test)
         recall_sklm = sklm.recall_score(y_test, y_pred_binary)
-        recall_sklm_inv = sklm.recall_score(y_pred_binary,y_test)
         f1score_sklm = sklm.f1_score(y_test, y_pred_binary)
-        f1score_sklm = sklm.f1_score(y_pred_binary,y_test)
         accuracy_sklm = sklm.accuracy_score(y_test, y_pred_binary)
 
         print("precision: ", precision_sklm)
-        print("precision inv:", precision_sklm_inv)
         print("recall: ", recall_sklm)
-        print("recall: inv", recall_sklm_inv)
         print("f1-score: ", f1score_sklm)
         print("accuracy: ", accuracy_sklm)
 
 # if the global model does not yet exist create a new fully untrained one
 if not os.path.exists("model/GlobalModel"):
+    print("Creating new GlobalModel!")
     model = DiabModel()
     torch.save(model.state_dict(), f"model/GlobalModel") 
+else:
+    print("Loading existing GlobalModel") # the actual loading is done within the training for each client
 
 
 if (len(sys.argv) == 1):
-    for split_index, split_data in enumerate(splits):
+    for client_index, split_data in enumerate(clients):
         train_size = int(0.8 * len(split_data))
         test_size = len(split_data) - train_size
         train_data, test_data = data.random_split(split_data, [train_size, test_size], generator=generator)
@@ -115,8 +114,8 @@ if (len(sys.argv) == 1):
                     optimizer.zero_grad()
                     loss.backward()
                     optimizer.step()
-                print(f'Split {split_index}, Epoch {epoch}, latest loss {loss}')
-            torch.save(model.state_dict(), f"model/Model_{split_index}")
+                print(f'Client {client_index}, Epoch {epoch}, latest loss {loss}')
+            torch.save(model.state_dict(), f"model/Model_{client_index}")
         train_model(model, optimizer, X_train, y_train, loss_fn, n_epochs)
         eval_model(model, X_test, y_test)
 # if a cli argument is given only evaluate
