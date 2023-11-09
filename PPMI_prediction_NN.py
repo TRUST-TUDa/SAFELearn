@@ -7,6 +7,7 @@ import torch.utils.data as data
 import sys
 import sklearn.metrics as sklm
 import os
+from torcheval.metrics.functional import multiclass_accuracy, multiclass_f1_score, multiclass_precision, multiclass_auroc
 
 torch.manual_seed(42)
 
@@ -34,17 +35,19 @@ for i in range(number_of_clients):
     split = fullset[i * split_size: (i + 1) * split_size]
     clients.append(split)
 
-n_epochs = 100
+n_epochs = 10000
 batch_size = 64
 
 class DiabModel(nn.Module):
     def __init__(self):
         super().__init__()
         self.linear1 = nn.Linear(12,20)
-        self.linear2 = nn.Linear(20,10)
-        self.linear3 = nn.Linear(10,4)
-        self.linear4 = nn.Linear(4,3)
-        self.act_fn = nn.ReLU()
+        self.linear2 = nn.Linear(20,15)
+        self.linear3 = nn.Linear(15,12)
+        self.linear4 = nn.Linear(12,8)
+        self.linear5 = nn.Linear(8,4)
+        self.linear6 = nn.Linear(4,3)
+        self.act_fn = nn.SiLU()
         self.sigm = nn.Sigmoid()
 
 
@@ -56,6 +59,10 @@ class DiabModel(nn.Module):
         x = self.linear3(x)
         x = self.act_fn(x)
         x = self.linear4(x)
+        x = self.act_fn(x)
+        x = self.linear5(x)
+        x = self.act_fn(x)
+        x = self.linear6(x)
         #x = self.sigm(x)
         return x
 
@@ -67,6 +74,8 @@ def eval_model(model, X_test, y_test):
     with torch.no_grad():
         y_pred = model(X_test)
         y_pred_integer = y_pred.round().cpu().numpy()
+        print(multiclass_f1_score(y_pred, torch.reshape( y_test, (-1, )), num_classes=3))
+        print(multiclass_auroc(y_pred, torch.reshape( y_test, (-1, )), num_classes=3))
         #precision_sklm = sklm.precision_score(y_test, y_pred_integer, average ='samples', labels= ['1, 2, 4'])
         #precision_sklm_inv = sklm.precision_score(y_pred_integer, y_test, average='samples')
         #recall_sklm = sklm.recall_score(y_test, y_pred_integer, average='samples')
@@ -105,7 +114,7 @@ if (len(sys.argv) == 1):
         #model.load_state_dict(torch.load("model/PPMImodels/GlobalModel"))
         
         loss_fn = nn.CrossEntropyLoss()
-        optimizer = optim.Adam(model.parameters(), lr=0.001)
+        optimizer = optim.Adam(model.parameters())
         def train_model(model, optimizer, X_train, y_train, loss_fn, n_epochs=100):
             model.train()
             model.to(device)
