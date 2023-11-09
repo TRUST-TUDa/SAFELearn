@@ -18,7 +18,7 @@ device = torch.device("cpu")
 #    torch.cuda.manual_seed_all(42)
 
 print("Device:", device)
-fullset = pd.read_csv('data/PPMI/PPMI_cleaned.csv')
+fullset = pd.read_csv('data/PPMI/PPMI_cleaned_altered.csv')
 fullset = torch.Tensor(fullset.to_numpy())
 
 generator = torch.Generator().manual_seed(42)

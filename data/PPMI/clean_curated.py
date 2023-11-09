@@ -31,6 +31,9 @@ for column in columns_to_keep:
         if(df[column][i] == '.'):
             df[column][i] = round((average[col_index] + (np.random.uniform(-1, 1) * std[col_index])), 4)
 
+for i in range(len(df['COHORT'])):
+    if (int(df['COHORT'][i]) == 4):
+        df['COHORT'][i] = 0
 
 df = df.groupby('PATNO').first().reset_index()
 df = df[columns_to_keep]
@@ -42,4 +45,4 @@ df.drop(columns=df.columns[0], axis=1, inplace=True)
 
 #df = df.dropna(subset=columns_to_keep)
 print(df.head)
-df.to_csv("data/PPMI/PPMI_cleaned.csv")
+df.to_csv("data/PPMI/PPMI_cleaned_altered.csv")
