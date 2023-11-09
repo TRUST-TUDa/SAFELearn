@@ -6,6 +6,7 @@ import torch.utils.data as data
 import sys
 import sklearn.metrics as sklm
 import os
+from torcheval.metrics.functional import multiclass_f1_score
 
 torch.manual_seed(42)
 
@@ -101,7 +102,7 @@ if (len(sys.argv) == 1):
         model.load_state_dict(torch.load("model/GlobalModel"))
         
         loss_fn = nn.BCELoss()
-        optimizer = optim.Adam(model.parameters(), lr=0.001)
+        optimizer = optim.Adam(model.parameters())
         def train_model(model, optimizer, X_train, y_train, loss_fn, n_epochs=100):
             model.train()
             model.to(device)
