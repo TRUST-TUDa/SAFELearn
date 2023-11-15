@@ -1,7 +1,7 @@
 share/
 .vscode/
 lib/
-lib74/
+lib64/
 include/
 bin/
 pyvenv.cfg
