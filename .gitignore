@@ -1,6 +1,6 @@
 share/
 .vscode/
-lib/
+lib/*
 lib64/
 include/
 bin/
