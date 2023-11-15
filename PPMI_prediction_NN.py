@@ -35,7 +35,7 @@ for i in range(number_of_clients):
     split = fullset[i * split_size: (i + 1) * split_size]
     clients.append(split)
 
-n_epochs = 10000
+n_epochs = 5000
 batch_size = 64
 
 class DiabModel(nn.Module):
@@ -44,9 +44,8 @@ class DiabModel(nn.Module):
         self.linear1 = nn.Linear(12,20)
         self.linear2 = nn.Linear(20,15)
         self.linear3 = nn.Linear(15,12)
-        self.linear4 = nn.Linear(12,8)
-        self.linear5 = nn.Linear(8,4)
-        self.linear6 = nn.Linear(4,3)
+        self.linear4 = nn.Linear(12,4)
+        self.linear5 = nn.Linear(4,3)
         self.act_fn = nn.SiLU()
         self.sigm = nn.Sigmoid()
 
@@ -61,8 +60,6 @@ class DiabModel(nn.Module):
         x = self.linear4(x)
         x = self.act_fn(x)
         x = self.linear5(x)
-        x = self.act_fn(x)
-        x = self.linear6(x)
         #x = self.sigm(x)
         return x
 
