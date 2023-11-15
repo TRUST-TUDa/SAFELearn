@@ -2,15 +2,34 @@ import torch
 import os
 import numpy as np
 import sys
+import glob
 
-torch.manual_seed(42)
-
+# Change constants here
+###############################################################################
 PUSH_FACTOR = 2 ** 10
 LIMIT = (2 ** 3) * PUSH_FACTOR
 
-if(len(sys.argv)==1):
-    print("For splitting use: python3", sys.argv[0], "split\nFor aggregating use: python3", sys.argv[0], "combine")
+PROJECT = "PPMI"
+# path where the new global model will be saved after combining the splits
+NEW_MODEL_PATH = f"model/{PROJECT}/GlobalModel.txt"
+GLOBAL_MODEL_PATH = f"model/{PROJECT}/GlobalModel.txt" # normally the same as NEW_MODEL_PATH
+SPLITTED_FILE_DIR = f"data/{PROJECT}Splits"
+MAX_MODELS = 10000
+TORCHSEED = 42
+###############################################################################
 
+# INIT
+###############################################################################
+# mode of this document c = combine, s = split, q = q-split
+print("which mode should be selected? c = combine, s = split, q = q-split")
+mode = input()
+
+if not os.path.exists(SPLITTED_FILE_DIR):
+        os.mkdir(SPLITTED_FILE_DIR)
+
+
+torch.manual_seed(TORCHSEED)
+###############################################################################
 
 def get_one_vec_sorted_layers(model):
     layer_names = model.keys()
@@ -38,7 +57,7 @@ def restrict_values(vec):
 def unrestrict_values(recovered_restricted_vec):
     recovered_restricted_vec = recovered_restricted_vec.type(torch.FloatTensor)
     return recovered_restricted_vec / PUSH_FACTOR
-    
+
 
 def split(restricted_vec):
     a = torch.LongTensor(restricted_vec.shape).random_(-LIMIT, LIMIT)
@@ -51,33 +70,50 @@ def split(restricted_vec):
         if safety_counter > 100:
             raise Exception('Did not find suitable randomvalues')
         indices_to_recompute = indices_to_recompute.view(-1)
-        print(f'\tRegenerate {indices_to_recompute.shape[0]} elements (from {restricted_vec.shape[0]})')
+        #print(f'\tRegenerate {indices_to_recompute.shape[0]} elements (from {restricted_vec.shape[0]})')
         a[indices_to_recompute] = torch.LongTensor(restricted_vec[indices_to_recompute].shape).random_(-LIMIT, LIMIT)
         b = restricted_vec - a
         safety_counter += 1
     return a, b
 
 
-def create_splits(directory_name, global_model_path, local_model_paths):
-    splitted_file_dir = "data/"+directory_name+"Splits"
-    if not os.path.exists(splitted_file_dir):
-        os.mkdir(splitted_file_dir)
+def delete_files(file_pattern):
+    files_to_delete = glob.glob(file_pattern)
+    for file in files_to_delete:
+        os.remove(file)
+
+
+def split_global_model(global_model_path):
+    delete_files(f"{SPLITTED_FILE_DIR}/A*")
+    delete_files(f"{SPLITTED_FILE_DIR}/B*")
     global_model = torch.load(global_model_path)
     global_model_as_vec = get_one_vec_sorted_layers(global_model)
     restricted_vec = restrict_values(global_model_as_vec)    
-    np.savetxt(splitted_file_dir + '/global.txt', restricted_vec.numpy(), fmt='%d')
-    
-    for i, model_path in enumerate(local_model_paths):
-        local_model = torch.load(model_path)
-        local_model_as_vec = get_one_vec_sorted_layers(local_model)
-        restricted_local_vec = restrict_values(local_model_as_vec)    
+    np.savetxt(f'{SPLITTED_FILE_DIR}/global.txt', restricted_vec.numpy(), fmt='%d')
+
+
+def create_splits(global_model_path, local_model_paths, q=False):
+    split_global_model(global_model_path)
+    for i, path in enumerate(local_model_paths):
+        vec = ""
+        if q:
+            delta_wk_h_np = np.loadtxt(path)
+            vec = torch.tensor(delta_wk_h_np)
+        else:
+            local_model = torch.load(path)
+            vec = get_one_vec_sorted_layers(local_model)
+
+        restricted_local_vec = restrict_values(vec)    
         a, b = split(restricted_local_vec)
-        a_file = f'{splitted_file_dir}/A_C{i:03d}.txt'
-        b_file = f'{splitted_file_dir}/B_C{i:03d}.txt'
+        a_file = f'{SPLITTED_FILE_DIR}/A_C{i:03d}.txt'
+        b_file = f'{SPLITTED_FILE_DIR}/B_C{i:03d}.txt'
         np.savetxt(a_file, a.numpy(), fmt='%d')
         np.savetxt(b_file, b.numpy(), fmt='%d')
-    print(a_file)
-    print(b_file)
+    print(f"Splitted {len(local_model_paths)} models into {SPLITTED_FILE_DIR}")
+
+
+def create_q_splits(global_model_path, delta_wk_h_paths):
+    create_splits(global_model_path,delta_wk_h_paths, q=True)
 
 
 def determine_number_of_entries_in_matrix(shape):
@@ -106,24 +142,39 @@ def determine_aggregated_model(old_global_model_path, path_to_share1, path_to_sh
     share1 = np.loadtxt(path_to_share1, dtype=np.int64)
     share2 = np.loadtxt(path_to_share2, dtype=np.int64)
     restricted_vec = share1 + share2
-    np.savetxt("./data/Aggregated/combined", restricted_vec, fmt='%d')
-
+    np.savetxt("./data/Aggregated/combined", restricted_vec, fmt='%d') #used for debugging purposes 
     unrestricted_vec = unrestrict_values(torch.from_numpy(restricted_vec))
     return recover_model_from_vec(old_global_model, unrestricted_vec, layer_names)
 
-if (len(sys.argv) >1 and sys.argv[1] == "split"):
-    print("Splitting to data/MyTestDir")
+def get_models_as_list(filename_without_i):
     localmodelpaths = []
-    for i in range(10000):
-        if os.path.exists(f"model/Model_{i}"):
-            localmodelpaths.append(f"model/Model_{i}")
+    for i in range(MAX_MODELS):
+        filename = f"{filename_without_i}{i}.txt"
+        if os.path.exists(filename):
+            localmodelpaths.append(filename)
         else: 
             break
-        
-    create_splits("MyTestDir","./model/GlobalModel",localmodelpaths)
+    return localmodelpaths
 
-newModelPath = "./model/GlobalModel"
-if (len(sys.argv) >1 and sys.argv[1] == "combine"):
-    print("Aggregating! - new model will be saved at", newModelPath)
-    newmodel = determine_aggregated_model("./model/GlobalModel", "./data/Aggregated/AggregatedModel_A.txt", "./data/Aggregated/AggregatedModel_B.txt")
-    torch.save(newmodel, newModelPath)
+
+
+# Execution mode s = split
+###############################################################################
+if (mode == "s"):
+    print(f"Splitting to data/{PROJECT}Splits")
+    localmodelpaths = get_models_as_list(f"model/{PROJECT}/Model_")
+    create_splits(GLOBAL_MODEL_PATH,localmodelpaths)
+
+# Execution mode q = q-split
+###############################################################################
+if (mode == "q"):
+    print(f"Splitting to data/{PROJECT}Splits")
+    localmodelpaths = get_models_as_list(f"model/{PROJECT}/Delta_")
+    create_q_splits(GLOBAL_MODEL_PATH,localmodelpaths)
+
+# Execution mode c = combine
+###############################################################################
+if (mode == "c"):
+    print("Aggregating! - new model will be saved at", NEW_MODEL_PATH)
+    newmodel = determine_aggregated_model(GLOBAL_MODEL_PATH, "./data/Aggregated/AggregatedModel_A.txt", "./data/Aggregated/AggregatedModel_B.txt")
+    torch.save(newmodel, NEW_MODEL_PATH)

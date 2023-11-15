@@ -7,38 +7,51 @@ import torch.utils.data as data
 import sys
 import sklearn.metrics as sklm
 import os
-from torcheval.metrics.functional import multiclass_accuracy, multiclass_f1_score, multiclass_precision, multiclass_auroc
+import glob
+from torcheval.metrics.functional import multiclass_f1_score, multiclass_auroc
 
-torch.manual_seed(42)
+# Change constants here
+###############################################################################
+LIPSCHITZCONSTANT = 1
+Q_FACTOR = 1
+TORCHSEED = 42
+DEFAULT_DEVICE = "cpu"
+NUMBER_OF_CLIENTS =3
+PROJECT = "PPMI"
+INPUT_DATA_PATH = f"input_data/{PROJECT}/PPMI_cleaned_altered.csv"
+MODEL_PATH= f"model/{PROJECT}/"
+GLOBAL_MODEL_PATH = f"{MODEL_PATH}/GlobalModel.txt"
+###############################################################################
 
-# Determine device (for GPU support)
-device = torch.device("cpu")
-#if torch.cuda.is_available():
-#    device = torch.device("cuda")
-#    torch.cuda.manual_seed(42)
-#    torch.cuda.manual_seed_all(42)
+# INIT
+###############################################################################
+torch.manual_seed(TORCHSEED)
+generator = torch.Generator().manual_seed(TORCHSEED)
 
+device = torch.device(DEFAULT_DEVICE)
 print("Device:", device)
-fullset = pd.read_csv('data/PPMI/PPMI_cleaned_altered.csv')
-fullset = torch.Tensor(fullset.to_numpy())
 
-generator = torch.Generator().manual_seed(42)
-torch.manual_seed(42)
+if not os.path.exists(MODEL_PATH):
+        os.mkdir(MODEL_PATH)
+###############################################################################
+
+
+fullset = pd.read_csv(INPUT_DATA_PATH)
+fullset = torch.Tensor(fullset.to_numpy())
 
 set_size = len(fullset)
 clients = []
-number_of_clients =1
 
-# Split the data into 100 non-overlapping parts
-split_size = len(fullset) // number_of_clients
-for i in range(number_of_clients):
-    split = fullset[i * split_size: (i + 1) * split_size]
+# Split the data into non-overlapping parts
+split_size = len(fullset) // NUMBER_OF_CLIENTS 
+for client_index in range(NUMBER_OF_CLIENTS):
+    split = fullset[client_index * split_size: (client_index + 1) * split_size]
     clients.append(split)
 
-n_epochs = 5000
+n_epochs = 50
 batch_size = 64
 
-class DiabModel(nn.Module):
+class PPMIModel(nn.Module):
     def __init__(self):
         super().__init__()
         self.linear1 = nn.Linear(12,20)
@@ -60,10 +73,7 @@ class DiabModel(nn.Module):
         x = self.linear4(x)
         x = self.act_fn(x)
         x = self.linear5(x)
-        #x = self.sigm(x)
         return x
-
-
 
 def eval_model(model, X_test, y_test):
     model.eval()
@@ -73,29 +83,28 @@ def eval_model(model, X_test, y_test):
         y_pred_integer = y_pred.round().cpu().numpy()
         print(multiclass_f1_score(y_pred, torch.reshape( y_test, (-1, )), num_classes=3))
         print(multiclass_auroc(y_pred, torch.reshape( y_test, (-1, )), num_classes=3))
-        #precision_sklm = sklm.precision_score(y_test, y_pred_integer, average ='samples', labels= ['1, 2, 4'])
-        #precision_sklm_inv = sklm.precision_score(y_pred_integer, y_test, average='samples')
-        #recall_sklm = sklm.recall_score(y_test, y_pred_integer, average='samples')
-        #recall_sklm_inv = sklm.recall_score(y_pred_integer,y_test, average='samples')
-        #f1score_sklm = sklm.f1_score(y_test, y_pred_integer, average='samples')
-        #f1score_sklm = sklm.f1_score(y_pred_integer,y_test, average='samples')
-        #accuracy_sklm = sklm.accuracy_score(y_test, y_pred_integer, average='samples')
-#
-        #print("precision: ", precision_sklm)
-        #print("precision inv:", precision_sklm_inv)
-        #print("recall: ", recall_sklm)
-        #print("recall: inv", recall_sklm_inv)
-        #print("f1-score: ", f1score_sklm)
-        #print("accuracy: ", accuracy_sklm)
+
 
 # if the global model does not yet exist create a new fully untrained one
-#if not os.path.exists("model/PPMImodels/GlobalModel"):
-#    model = DiabModel()
-#    torch.save(model.state_dict(), f"model/PPMImodels/GlobalModel") 
+if not os.path.exists(GLOBAL_MODEL_PATH):
+    model = PPMIModel()
+    torch.save(model.state_dict(), GLOBAL_MODEL_PATH)
 
+global_model = PPMIModel()
+global_model.load_state_dict(torch.load(GLOBAL_MODEL_PATH))
+
+def delete_files(file_pattern):
+    files_to_delete = glob.glob(file_pattern)
+    for file in files_to_delete:
+        os.remove(file)
+
+# delete all existing client models, losses, and delta files
+delete_files(f"{MODEL_PATH}Model_*")
+delete_files(f"{MODEL_PATH}Loss_*")
+delete_files(f"{MODEL_PATH}Delta_*")
 
 if (len(sys.argv) == 1):
-    for split_index, split_data in enumerate(clients):
+    for client_index, split_data in enumerate(clients):
         train_size = int(0.8 * len(split_data))
         test_size = len(split_data) - train_size
         train_data, test_data = data.random_split(split_data, [train_size, test_size], generator=generator)
@@ -105,16 +114,17 @@ if (len(sys.argv) == 1):
         X_test = torch.tensor(test_data.dataset[:, 2:], dtype=torch.float32)
         y_test = torch.tensor(test_data.dataset[:, 1], dtype=torch.float32).reshape(-1, 1)
         
-        model = DiabModel()
+        model = PPMIModel()
         # if there exists a global model from earlier learnings import it
+        model.load_state_dict(torch.load(GLOBAL_MODEL_PATH))
 
-        #model.load_state_dict(torch.load("model/PPMImodels/GlobalModel"))
-        
         loss_fn = nn.CrossEntropyLoss()
         optimizer = optim.Adam(model.parameters())
+
         def train_model(model, optimizer, X_train, y_train, loss_fn, n_epochs=100):
             model.train()
             model.to(device)
+                        
             for epoch in range(n_epochs):
                 for i in range(0, len(X_train), batch_size):
                     Xbatch = X_train[i:i+batch_size].to(device)
@@ -124,20 +134,64 @@ if (len(sys.argv) == 1):
                     optimizer.zero_grad()
                     loss.backward()
                     optimizer.step()
-                print(f'Split {split_index}, Epoch {epoch}, latest loss {loss}')
-            torch.save(model.state_dict(), f"model/PPMImodels/Model_{split_index}")
+                print(f'Client {client_index}, Epoch {epoch}, latest loss {loss}')
+            torch.save(model.state_dict(), f"{MODEL_PATH}Model_{client_index}.txt")
+            #torch.save(loss_fn(y_pred, torch.reshape(y_train, (-1,)).to(torch.int64)), f"model/PPMImodels/Loss_{client_index}")
+
+        ## execute the code    
         train_model(model, optimizer, X_train, y_train, loss_fn, n_epochs)
         eval_model(model, X_test, y_test)
+        
 # if a cli argument is given only evaluate
 else: 
-    if os.path.exists("model/PPMImodels/GlobalModel"):
-        model = DiabModel()
-        model.load_state_dict(torch.load("model/PPMImodels/GlobalModel"))
+    if os.path.exists(GLOBAL_MODEL_PATH):
+        model = PPMIModel()
+        model.load_state_dict(torch.load(GLOBAL_MODEL_PATH))
         X_test_all = torch.tensor(fullset[:, 2:], dtype=torch.float32)
         y_test_all = torch.tensor(fullset[:, 1], dtype=torch.float32).reshape(-1, 1)
         eval_model(model, X_test_all, y_test_all)
     else: 
         print("no global model found")
         quit()
-        
-        
+
+
+def get_one_vec_sorted_layers(model):
+    layer_names = model.keys()
+    size = 0
+    for name in layer_names:
+        size += model[name].view(-1).shape[0]
+    sum_var = torch.FloatTensor(size).fill_(0)
+    size = 0
+    for name in layer_names:
+        layer_as_vector = model[name].view(-1)
+        layer_width = layer_as_vector.shape[0]
+        sum_var[size:size + layer_width] = layer_as_vector
+        size += layer_width
+    return sum_var
+
+
+
+def calculate_delta_wt(global_model, model, L):
+    vec_glob = get_one_vec_sorted_layers(global_model.state_dict())
+    vec_mod = get_one_vec_sorted_layers(model.state_dict())
+    return L * (vec_glob - vec_mod)
+
+def calculate_delta(q, loss, deltawt):
+    return loss ** q * deltawt
+
+def calculate_ht(q, loss, deltawt, L):
+    return q * loss.detach().numpy() ** q * pow(np.linalg.norm(deltawt.detach().numpy(),2), 2) + loss.detach().numpy() ** q * L
+
+y_pred = global_model(X_train)
+loss = loss_fn(y_pred, torch.reshape(y_train, (-1,)).to(torch.int64))
+
+for client_index in range(len(clients)):
+    model = PPMIModel()
+    model.load_state_dict(torch.load(f"{MODEL_PATH}Model_{client_index}.txt"))
+    deltawt = calculate_delta_wt(global_model, model, LIPSCHITZCONSTANT)
+    delta = calculate_delta(Q_FACTOR, loss, deltawt)
+    ht = calculate_ht(Q_FACTOR, loss, deltawt, LIPSCHITZCONSTANT)
+    combined = np.concatenate((np.array([ht]), delta.detach().numpy()))
+    np.savetxt(f"{MODEL_PATH}Delta_{client_index}.txt", combined, fmt='%.8f')
+    #f.write(delta.numpy() + "\n" + ht.numpy())
+    #f.close()
