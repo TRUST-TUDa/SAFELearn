@@ -88,11 +88,36 @@ TypedYaoCircuit &yc){
 /// @param global_model the global model 
 /// @param q_vals the weights (used for weighted average)
 /// @return The update as OUTPUT_NUMBER_TYPE
-OUTPUT_NUMBER_TYPE *aggregate_models(MPCParty &party, uint32_t bitlen, size_t number_of_elements,
+OUTPUT_NUMBER_TYPE *aggregate_models_weighted(MPCParty &party, uint32_t bitlen, size_t number_of_elements,
                                      vector<ArithmeticShare> *updates, TypedArithmeticCircuit &ac, TypedYaoCircuit &yc,
                                      const ArithmeticShare &global_model, const ArithmeticShare * q_vals) {
     ArithmeticShare average = weighted_average_over_updates(bitlen, number_of_elements, updates, ac, yc, q_vals);
     //ArithmeticShare average = average_over_updates(bitlen, number_of_elements, updates, ac, yc); -- use this if normal average is needed instead of weighted one
+    ArithmeticShare aggregated_model = ac->PutADDGate(average, global_model);
+    UntypedSharedOutputShare output_share = ac->PutSharedOUTGate(aggregated_model);
+    party->ExecCircuit("Aggregation");
+    uint32_t actual_bitlen, actual_number_of_elements;
+    OUTPUT_NUMBER_TYPE *result_values;
+    output_share->get_shared_value_vec(&result_values, &actual_bitlen, &actual_number_of_elements);
+    assert(bitlen == actual_bitlen);
+    assert(number_of_elements == actual_number_of_elements);
+    return result_values;
+}
+
+/// @brief updates 
+/// @param party the mpc party 
+/// @param bitlen the bitlen of the shares
+/// @param number_of_elements the number of element each share has
+/// @param updates a vector of all updates as arithmetic shares
+/// @param ac the arithmetic circuit
+/// @param yc the yao circuit
+/// @param global_model the global model 
+/// @param q_vals the weights (used for weighted average)
+/// @return The update as OUTPUT_NUMBER_TYPE
+OUTPUT_NUMBER_TYPE *aggregate_models_normal_avg(MPCParty &party, uint32_t bitlen, size_t number_of_elements,
+                                     vector<ArithmeticShare> *updates, TypedArithmeticCircuit &ac, TypedYaoCircuit &yc,
+                                     const ArithmeticShare &global_model) {
+    ArithmeticShare average = average_over_updates(bitlen, number_of_elements, updates, ac, yc); 
     ArithmeticShare aggregated_model = ac->PutADDGate(average, global_model);
     UntypedSharedOutputShare output_share = ac->PutSharedOUTGate(aggregated_model);
     party->ExecCircuit("Aggregation");
