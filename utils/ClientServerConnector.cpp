@@ -16,20 +16,94 @@ bool is_file_existing(const string &file_name) {
     return result;
 }
 
+
+/*
+* Reads the first delta file to determine the length of delta
+* h and delta vectors are later used to write all corresponding values into them
+* returns the length of delta for a single model
+*/
+uint8_t find_delta_size(string directory, ROLE_TYPE role){
+    string file_name = str(format("%s%s_C000.txt") % directory % role);
+    cout << "Read size from: " << file_name << endl;
+    std::fstream input_file(file_name, std::ios_base::in);
+    vector<NUMBER_TYPE> counter;
+
+    SIGNED_NUMBER_TYPE a;
+    while (input_file >> a) {
+        counter.push_back(a);
+    }
+    return counter.size() -1;  // 
+}
+
+/*
+* Returns 2 arrays. One for the delta's of a single model and one for the h value of the model
+*/
+tuple<NUMBER_TYPE *, NUMBER_TYPE *> read_deltas_and_h(const string &file_name, uint32_t number_of_entries) {
+    auto *delta_values = new NUMBER_TYPE[number_of_entries];
+    auto *h_value = new NUMBER_TYPE[1];
+    uint32_t next_entry_to_read = 0;
+
+    std::fstream input_file(file_name, std::ios_base::in);
+    SIGNED_NUMBER_TYPE a;
+    while (input_file >> a) {
+        if(next_entry_to_read == 0){
+            h_value[0] = a; 
+        }
+        else {
+            delta_values[next_entry_to_read] = a;
+        }
+        assert(next_entry_to_read < number_of_entries+1);  // +1 because next_entry_to_read will read including the h value so it will 1 larger than our delta size
+        next_entry_to_read++;
+    }
+    assert(next_entry_to_read == number_of_entries+1);
+    return {delta_values, h_value};
+}
+
+
+/*
+* Reads all models and creates 2 vectors containing 
+*/
+tuple<uint32_t, tuple<vector<NUMBER_TYPE *> *, vector<NUMBER_TYPE *> *>> read_q_fed_avg_data(string directory, ROLE_TYPE role,
+                                                           size_t max_models_to_read){
+    auto *delta_values  = new vector<NUMBER_TYPE*>();
+    auto *h_vec = new vector<NUMBER_TYPE*>();
+    //auto *client_models = new vector<NUMBER_TYPE *>();
+    auto number_of_entries_in_delta = find_delta_size(directory, role);
+
+    unsigned int current_client_index = 1;
+    string file_name = str(format("%s%s_C%03u.txt") % directory % role % current_client_index);
+
+    while ((max_models_to_read == 0 || delta_values->size() < max_models_to_read) && is_file_existing(file_name)) {
+
+        cout << "Read local model from: " << file_name << endl;
+        auto deltas_and_h = read_deltas_and_h(file_name, number_of_entries_in_delta);
+        NUMBER_TYPE* curr_deltas  = get<0>(deltas_and_h);
+        NUMBER_TYPE* curr_h = get<1>(deltas_and_h);
+
+        delta_values->push_back(curr_deltas);
+        h_vec->push_back(curr_h);
+
+        current_client_index += 1;
+        file_name = str(format("%s%s_C%03u.txt") % directory % role % current_client_index);
+    }
+    return {number_of_entries_in_delta, {delta_values, h_vec}};
+
+}
+
 tuple<uint32_t, NUMBER_TYPE *> read_first_model(string directory, ROLE_TYPE role) {
 
     string file_name = str(format("%s%s_C000.txt") % directory % role);
     cout << "Read local model from: " << file_name << endl;
     std::fstream input_file(file_name, std::ios_base::in);
-    vector<NUMBER_TYPE> model_of_client;
+    vector<NUMBER_TYPE> counter;
 
     SIGNED_NUMBER_TYPE a;
     while (input_file >> a) {
-        model_of_client.push_back(a);
+        counter.push_back(a);
     }
-    auto *model_as_array = new SIGNED_NUMBER_TYPE[model_of_client.size()];
-    copy(model_of_client.begin(), model_of_client.end(), model_as_array);
-    return {model_of_client.size(), (NUMBER_TYPE *) model_as_array};
+    auto *model_as_array = new SIGNED_NUMBER_TYPE[counter.size()];
+    copy(counter.begin(), counter.end(), model_as_array);
+    return {counter.size(), (NUMBER_TYPE *) model_as_array};
 }
 
 NUMBER_TYPE *read_model(const string &file_name, uint32_t number_of_entries) {
@@ -49,7 +123,7 @@ NUMBER_TYPE *read_model(const string &file_name, uint32_t number_of_entries) {
     return (NUMBER_TYPE *) result;
 }
 
-NUMBER_TYPE *read_q(const string &file_name, uint32_t number_of_entries) {
+NUMBER_TYPE *_read_weights(const string &file_name, uint32_t number_of_entries) {
 
     auto *result = new SIGNED_NUMBER_TYPE[number_of_entries];
     uint32_t next_entry_to_read = 0;
@@ -99,13 +173,13 @@ NUMBER_TYPE *read_global_model(string directory, uint32_t number_of_entries) {
 
 }
 
-NUMBER_TYPE *read_q_vals(string directory, uint32_t number_of_entries) {
+NUMBER_TYPE *read_weights(string directory, uint32_t number_of_entries) {
 
     string file_name = str(format("%sq_vals.txt") % directory);
     
     if (is_file_existing(file_name)){
         cout << "Read Q-values from: " << file_name << endl;
-        return read_q(file_name, number_of_entries);
+        return _read_weights(file_name, number_of_entries);
     }
     else {
         cout << "create Q-values all : "<< number_of_entries << " " << file_name << endl;
@@ -116,7 +190,7 @@ NUMBER_TYPE *read_q_vals(string directory, uint32_t number_of_entries) {
                 new_file << number_of_entries << endl;
             }
             new_file.close();
-            return read_q(file_name, number_of_entries);
+            return _read_weights(file_name, number_of_entries);
         }
         else {
             cout << "Failed to create: " << file_name << endl;

@@ -31,6 +31,9 @@ generator = torch.Generator().manual_seed(TORCHSEED)
 device = torch.device(DEFAULT_DEVICE)
 print("Device:", device)
 
+if not os.path.exists("model"):
+        os.mkdir("model")
+
 if not os.path.exists(MODEL_PATH):
         os.mkdir(MODEL_PATH)
 ###############################################################################

@@ -9,9 +9,11 @@
 using namespace std;
 
 tuple<uint32_t, vector<NUMBER_TYPE *> *> read_local_models(string directory, ROLE_TYPE role, size_t max_models_to_read);
+tuple<uint32_t, tuple<vector<NUMBER_TYPE *> *, vector<NUMBER_TYPE *> *>> read_q_fed_avg_data(string directory, ROLE_TYPE role,
+                                                           size_t max_models_to_read);
 
 NUMBER_TYPE *read_global_model(string directory, uint32_t number_of_entries);
-NUMBER_TYPE *read_q_vals(string directory, uint32_t number_of_entries);
+NUMBER_TYPE *read_weights(string directory, uint32_t number_of_entries);
 
 void send_aggregated_model(string directory, uint32_t number_of_entries_per_model, OUTPUT_NUMBER_TYPE *model,
                            ROLE_TYPE role);
