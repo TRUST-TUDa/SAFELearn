@@ -72,7 +72,7 @@ int main(int argc, char **argv)
     string dataset = "TestData";
     size_t n = 100;
     size_t real_parameters = -1;
-    uint8_t mode = 2; // 0 = fed-average, 1 = weighted, 2 = q-fed-average
+    uint8_t mode = 0; // 0 = fed-average, 1 = weighted, 2 = q-fed-average
 
     read_test_options(&argc, &argv, &mpc_role, &bitlen, &secparam, &address, &port, &dataset, &n, &real_parameters, &mode);
 
