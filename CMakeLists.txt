@@ -18,7 +18,7 @@ set(NON_ABY_LIBRARIES gmpxx gmp pthread boost_system crypto dl backtrace)
 set(ABY_LIBRARIES "${ABY_LIB_PATH}/libaby.a" "${ABY_LIB_PATH}/libencrypto_utils.a" "${ABY_LIB_PATH}/libotextension.a" "${ABY_LIB_PATH}/librelic_s.a")
 set(COMPILE_OPTIONS PUBLIC -Wall -Wextra -g3 -std=c++17)
 
-add_executable(fedavg_aggregation FedAvgModelAggregationTest.cpp ${NonMainCPPFiles})
+add_executable(fedavg_aggregation FedAvgModelAggregation.cpp ${NonMainCPPFiles})
 include_directories(fedavg_aggregation "${ABY_PATH}/include")
 target_link_libraries(fedavg_aggregation ${ABY_LIBRARIES})
 target_link_libraries(fedavg_aggregation ${NON_ABY_LIBRARIES})
