@@ -208,12 +208,11 @@ void save_model(uint32_t number_of_entries_per_model, const string &file_name, O
         number_of_entries_per_model--;
     }
     for (uint32_t i = 0; i < number_of_entries_per_model; i++) {
-        if (i > 0) {
-            ofile << std::endl;
-        }
-        ofile << signed_model[i];
+        cout << "iteration number" << i << endl;
+        cout << "model " << i << signed_model[i] << endl;
+        ofile << signed_model[i] << std::endl;
     }
-    ofile << std::endl;
+
     ofile.close();
 }
 
