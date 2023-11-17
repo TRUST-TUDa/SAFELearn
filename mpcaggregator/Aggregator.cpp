@@ -176,5 +176,3 @@ OUTPUT_NUMBER_TYPE *aggregate_models_q_fed(MPCParty &party, uint32_t bitlen, siz
     assert(number_of_elements == actual_number_of_elements);
     return result_values;
 }
-
-
