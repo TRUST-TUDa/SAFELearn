@@ -109,11 +109,9 @@ NUMBER_TYPE *read_model(const string &file_name, uint32_t number_of_entries) {
     auto *result = new SIGNED_NUMBER_TYPE[number_of_entries];
     uint32_t next_entry_to_read = 0;
 
-    cout << number_of_entries << endl; // delete me
     std::fstream input_file(file_name, std::ios_base::in);
     SIGNED_NUMBER_TYPE a;
     while (input_file >> a) {
-        cout << next_entry_to_read << endl;
         assert(next_entry_to_read < number_of_entries);
         result[next_entry_to_read] = a;
         
