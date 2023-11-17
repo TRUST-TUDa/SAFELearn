@@ -201,8 +201,6 @@ NUMBER_TYPE *read_weights(string directory, uint32_t number_of_entries) {
 
 void save_model(uint32_t number_of_entries_per_model, const string &file_name, OUTPUT_NUMBER_TYPE *model, uint8_t mode) {
 
-    cout << "im now trying to save";
-
     auto *signed_model = (SIGNED_OUTPUT_NUMBER_TYPE *) model;
 
 
@@ -213,8 +211,6 @@ void save_model(uint32_t number_of_entries_per_model, const string &file_name, O
         number_of_entries_per_model--;
     }
     for (uint32_t i = 0; i < number_of_entries_per_model; i++) {
-        cout << "iteration number" << i << endl;
-        cout << "model " << i << signed_model[i] << endl;
         ofile << signed_model[i] << std::endl;
     }
 
@@ -224,7 +220,5 @@ void save_model(uint32_t number_of_entries_per_model, const string &file_name, O
 void send_aggregated_model(string directory, uint32_t number_of_entries_per_model, OUTPUT_NUMBER_TYPE *model,
                            ROLE_TYPE role, uint8_t mode) {
     auto file_name_model = str(format("%sAggregatedModel_%s.txt") % directory % role);
-    cout << "im now trying to send" << endl;
-    cout << file_name_model << endl;
     save_model(number_of_entries_per_model, file_name_model, model,  mode);
 }

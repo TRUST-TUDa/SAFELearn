@@ -142,17 +142,10 @@ OUTPUT_NUMBER_TYPE *init_aggregation_q_fed(e_role role, const std::string &addre
 
     seed_random_generator();
 
-
-
-
-
-
     vector<ArithmeticShare> deltas_share_vec;
     deltas_share_vec.reserve(deltas->size());
     vector<ArithmeticShare> h_share_vec;
     h_share_vec.reserve(h_values->size());
-
-    
 
     //NUMBER_TYPE *tmp_update_storage = create_tmp_update_storage(number_of_entries);
 
