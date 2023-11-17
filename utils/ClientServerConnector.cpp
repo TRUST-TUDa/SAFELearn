@@ -72,7 +72,7 @@ tuple<uint32_t, tuple<vector<NUMBER_TYPE *> *, vector<NUMBER_TYPE *> *>> read_q_
     //auto *client_models = new vector<NUMBER_TYPE *>();
     auto number_of_entries_in_delta = find_delta_size(directory, role);
 
-    unsigned int current_client_index = 1;
+    unsigned int current_client_index = 0;
     string file_name = str(format("%s%s_C%03u.txt") % directory % role % current_client_index);
 
     while ((max_models_to_read == 0 || delta_values->size() < max_models_to_read) && is_file_existing(file_name)) {
@@ -85,9 +85,10 @@ tuple<uint32_t, tuple<vector<NUMBER_TYPE *> *, vector<NUMBER_TYPE *> *>> read_q_
         cout << "after access tuples" << file_name << endl;
         delta_values->push_back(curr_deltas);
         h_vec->push_back(curr_h);
-        cout << "after vector pushes " << file_name << endl;
+        cout << "after vector pushes " << file_name << delta_values->size() << endl;
         current_client_index += 1;
         file_name = str(format("%s%s_C%03u.txt") % directory % role % current_client_index);
+        cout << "endloop " << endl;
     }
     return {number_of_entries_in_delta, {delta_values, h_vec}};
 
