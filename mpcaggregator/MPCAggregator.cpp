@@ -157,9 +157,9 @@ OUTPUT_NUMBER_TYPE *init_aggregation_q_fed(e_role role, const std::string &addre
     //NUMBER_TYPE *tmp_update_storage = create_tmp_update_storage(number_of_entries);
 
 
-    for (auto &local_model : *deltas)
+    for (auto &delta : *deltas)
     {
-        ArithmeticShare update = arithmetic_circuit->PutSharedSIMDINGate(number_of_entries, deltas, BIT_LENGTH);
+        ArithmeticShare update = arithmetic_circuit->PutSharedSIMDINGate(number_of_entries, delta, BIT_LENGTH);
         
         //create_typed_update_share(BIT_LENGTH, role, arithmetic_circuit, global_model,
         //                                                   local_model, number_of_entries, tmp_update_storage);
@@ -169,7 +169,7 @@ OUTPUT_NUMBER_TYPE *init_aggregation_q_fed(e_role role, const std::string &addre
 
     for (auto &h : *h_values)
     {
-        ArithmeticShare update = arithmetic_circuit->PutSharedSIMDINGate(number_of_entries, deltas, BIT_LENGTH);
+        ArithmeticShare update = arithmetic_circuit->PutSharedSIMDINGate(number_of_entries, h, BIT_LENGTH);
         h_share_vec.push_back(update);
     }
 
