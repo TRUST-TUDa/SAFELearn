@@ -85,10 +85,10 @@ tuple<uint32_t, tuple<vector<NUMBER_TYPE *> *, vector<NUMBER_TYPE *> *>> read_q_
         cout << "after access tuples" << file_name << endl;
         delta_values->push_back(curr_deltas);
         h_vec->push_back(curr_h);
-        cout << "after vector pushes " << file_name << "size delta: "<<delta_values->size() << "and size h: " <<h_vec->size() << endl;
+        cout << "after vector pushes " << file_name << "size delta: "<<delta_values->size() << " and size h: " <<h_vec->size() << endl;
         current_client_index++ ;
         cout << "++ " << endl;
-        file_name = str(format("%s%s_C%03u.txt") % directory % role % current_client_index);
+        //file_name = str(format("%s%s_C%03u.txt") % directory % role % current_client_index);
         cout << file_name << endl;
         cout << "endloop " << endl;
     }
