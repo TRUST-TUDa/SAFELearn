@@ -203,6 +203,7 @@ void save_model(uint32_t number_of_entries_per_model, const string &file_name, O
 
     std::ofstream ofile;
     ofile.open(file_name, std::ios_base::out);
+    cout << number_of_entries_per_model << endl;
     if (mode == 2){
         number_of_entries_per_model--;
     }
