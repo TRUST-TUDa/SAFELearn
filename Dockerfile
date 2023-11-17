@@ -26,6 +26,7 @@ RUN mkdir -p build && cd build && cmake .. && make && make install
 WORKDIR /SAFELearn
 RUN sed -i 's|ABSOLUTE_PATH_TO_ABY|/ABY/build|g' ./CMakeLists.txt \
     && sed -i 's|/include|/extern/ENCRYPTO_utils/include|g' ./CMakeLists.txt \
+    && sed -i 's|FedAvgModelAggregationTest|FedAvgModelAggregation|g' ./CMakeLists.txt \
     && mkdir -p build && mkdir -p model && cd build && cmake .. && make
 
 # Get pip and use it for installing Python modules
