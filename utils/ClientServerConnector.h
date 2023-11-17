@@ -16,6 +16,6 @@ NUMBER_TYPE *read_global_model(string directory, uint32_t number_of_entries);
 NUMBER_TYPE *read_weights(string directory, uint32_t number_of_entries);
 
 void send_aggregated_model(string directory, uint32_t number_of_entries_per_model, OUTPUT_NUMBER_TYPE *model,
-                           ROLE_TYPE role, uint8_t mode);
+                           ROLE_TYPE role);
 
 #endif /* __CLIENT_SERVER_CONNECTOR_H_ */
