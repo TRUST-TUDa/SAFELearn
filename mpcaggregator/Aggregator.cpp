@@ -94,6 +94,8 @@ ArithmeticShare q_fed_over_updates(uint32_t bitlen, size_t number_of_elements, v
             summed_deltas = ac->PutADDGate(summed_deltas, update); 
         }
     }
+    
+    bool is_first_update = true;
     for (const auto &update : *h)
     {
         if (is_first_update) {
