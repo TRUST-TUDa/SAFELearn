@@ -22,7 +22,7 @@ bool is_file_existing(const string &file_name) {
 * h and delta vectors are later used to write all corresponding values into them
 * returns the length of delta for a single model
 */
-uint8_t find_delta_size(string directory, ROLE_TYPE role){
+uint32_t find_delta_size(string directory, ROLE_TYPE role){
     string file_name = str(format("%s%s_C000.txt") % directory % role);
     cout << "Read size from: " << file_name << endl;
     std::fstream input_file(file_name, std::ios_base::in);
