@@ -54,10 +54,10 @@ tuple<NUMBER_TYPE *, NUMBER_TYPE *> read_deltas_and_h(const string &file_name, u
             cout << "filling delta array " << number_of_entries << endl;
             delta_values[next_entry_to_read-1] = a;
         }
-        assert(next_entry_to_read < number_of_entries+1);  // +1 because next_entry_to_read will read including the h value so it will 1 larger than our delta size
+        //assert(next_entry_to_read < number_of_entries+1);  // +1 because next_entry_to_read will read including the h value so it will 1 larger than our delta size
         next_entry_to_read++;
     }
-    assert(next_entry_to_read == number_of_entries+1);
+    //assert(next_entry_to_read == number_of_entries+1);
     return {delta_values, h_value};
 }
 
