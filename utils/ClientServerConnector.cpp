@@ -30,8 +30,10 @@ uint8_t find_delta_size(string directory, ROLE_TYPE role){
 
     SIGNED_NUMBER_TYPE a;
     while (input_file >> a) {
+        cout << a << endl;
         counter.push_back(a);
     }
+    cout << "size = " << counter.size() -1 << endl;
     return counter.size() -1;  // 
 }
 
@@ -52,7 +54,7 @@ tuple<NUMBER_TYPE *, NUMBER_TYPE *> read_deltas_and_h(const string &file_name, u
             cout << "filling h " << next_entry_to_read << endl;
         }
         else {
-            cout << "filling delta array " << next_entry_to_read << endl;
+            cout << "filling delta array " << next_entry_to_read-1 << endl;
             delta_values[next_entry_to_read-1] = a;
         }
         assert(next_entry_to_read < number_of_entries+1);  // +1 because next_entry_to_read will read including the h value so it will 1 larger than our delta size

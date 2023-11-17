@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     seclvl seclvl = get_sec_lvl(secparam);
 
     ROLE_TYPE role = mpc_role ? CLIENT_KEY : SERVER_KEY;
-    cout << get_time_as_string() << "This is Aggregator" << role << endl;
+    cout << get_time_as_string() << "This is Aggregator" << role << " and mode "<< mode <<endl;
     cout << "(Is server: " << (mpc_role == SERVER) << ")" << endl;
     string directory = DATA_DIR + dataset + "Splits/";
 
