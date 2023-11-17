@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     seclvl seclvl = get_sec_lvl(secparam);
 
     ROLE_TYPE role = mpc_role ? CLIENT_KEY : SERVER_KEY;
-    cout << get_time_as_string() << "This is Aggregator" << role << " and mode "<< mode <<endl;
+    cout << get_time_as_string() << "This is Aggregator " << role << " and mode "<< mode <<endl;
     cout << "(Is server: " << (mpc_role == SERVER) << ")" << endl;
     string directory = DATA_DIR + dataset + "Splits/";
 
@@ -132,7 +132,7 @@ int main(int argc, char **argv)
     cout << get_time_as_string() << "Aggregation Component is Done" << endl;
 
     send_aggregated_model(DATA_DIR + "Aggregated/", entries_per_model, aggregated_model,
-                          role);
+                          role, mode);
 
     delete[] (*models_of_client)[0];
     models_of_client->clear();
