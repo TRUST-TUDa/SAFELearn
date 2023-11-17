@@ -88,7 +88,9 @@ tuple<uint32_t, tuple<vector<NUMBER_TYPE *> *, vector<NUMBER_TYPE *> *>> read_q_
         cout << "after vector pushes " << file_name << delta_values->size() << endl;
         current_client_index++ ;
         cout << "++ " << endl;
-        file_name = str(format("%s%s_C%03u.txt") % directory % role % current_client_index);
+        string new_filename = str(format("%s%s_C%03u.txt") % directory % role % current_client_index);
+        cout << "adsölfkjadöflkj " << endl;
+        file_name = new_filename;
         cout << "endloop " << endl;
     }
     return {number_of_entries_in_delta, {delta_values, h_vec}};
