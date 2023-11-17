@@ -33,7 +33,6 @@ uint32_t find_delta_size(string directory, ROLE_TYPE role){
         cout << a << endl;
         counter.push_back(a);
     }
-    cout << "size = " << counter.size() -1 << endl;
     return counter.size() -1;  // 
 }
 
@@ -51,10 +50,8 @@ tuple<NUMBER_TYPE *, NUMBER_TYPE *> read_deltas_and_h(const string &file_name, u
     while (input_file >> a) {
         if(next_entry_to_read == 0){
             h_value[0] = a; 
-            cout << "filling h " << next_entry_to_read << endl;
         }
         else {
-            cout << "filling delta array " << next_entry_to_read-1 << endl;
             delta_values[next_entry_to_read-1] = a;
         }
         assert(next_entry_to_read < number_of_entries+1);  // +1 because next_entry_to_read will read including the h value so it will 1 larger than our delta size
@@ -82,18 +79,13 @@ tuple<uint32_t, tuple<vector<NUMBER_TYPE *> *, vector<NUMBER_TYPE *> *>> read_q_
 
         cout << "Read local model from: " << file_name << endl;
         auto deltas_and_h = read_deltas_and_h(file_name, number_of_entries_in_delta);
-        cout << "reading successful" << file_name << endl;
         NUMBER_TYPE* curr_deltas  = get<0>(deltas_and_h);
         NUMBER_TYPE* curr_h = get<1>(deltas_and_h);
-        cout << "after access tuples" << file_name << endl;
         delta_values->push_back(curr_deltas);
         h_vec->push_back(curr_h);
-        cout << "after vector pushes " << file_name << "size delta: "<<delta_values->size() << " and size h: " <<h_vec->size() << endl;
         current_client_index++ ;
-        cout << "++ " << endl;
-        //file_name = str(format("%s%s_C%03u.txt") % directory % role % current_client_index);
+        file_name = str(format("%s%s_C%03u.txt") % directory % role % current_client_index);
         cout << file_name << endl;
-        cout << "endloop " << endl;
     }
     return {number_of_entries_in_delta, {delta_values, h_vec}};
 
