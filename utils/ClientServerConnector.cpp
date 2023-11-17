@@ -30,7 +30,6 @@ uint32_t find_delta_size(string directory, ROLE_TYPE role){
 
     SIGNED_NUMBER_TYPE a;
     while (input_file >> a) {
-        cout << a << endl;
         counter.push_back(a);
     }
     return counter.size() -1;  // 
@@ -40,7 +39,6 @@ uint32_t find_delta_size(string directory, ROLE_TYPE role){
 * Returns 2 arrays. One for the delta's of a single model and one for the h value of the model
 */
 tuple<NUMBER_TYPE *, NUMBER_TYPE *> read_deltas_and_h(const string &file_name, uint32_t number_of_entries) {
-    cout << number_of_entries << endl;
     auto *delta_values = new NUMBER_TYPE[number_of_entries];
     auto *h_value = new NUMBER_TYPE[1];
     uint32_t next_entry_to_read = 0;
@@ -85,7 +83,6 @@ tuple<uint32_t, tuple<vector<NUMBER_TYPE *> *, vector<NUMBER_TYPE *> *>> read_q_
         h_vec->push_back(curr_h);
         current_client_index++ ;
         file_name = str(format("%s%s_C%03u.txt") % directory % role % current_client_index);
-        cout << file_name << endl;
     }
     return {number_of_entries_in_delta, {delta_values, h_vec}};
 
