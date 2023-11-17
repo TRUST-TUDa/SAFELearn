@@ -132,7 +132,7 @@ int main(int argc, char **argv)
     cout << get_time_as_string() << "Aggregation Component is Done" << endl;
 
     send_aggregated_model(DATA_DIR + "Aggregated/", entries_per_model, aggregated_model,
-                          role, mode);
+                          role);
 
     delete[] (*models_of_client)[0];
     models_of_client->clear();
