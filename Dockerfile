@@ -31,7 +31,7 @@ RUN sed -i 's|ABSOLUTE_PATH_TO_ABY|/ABY/build|g' ./CMakeLists.txt \
 # Get pip and use it for installing Python modules
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py && rm get-pip.py
 RUN python3 -m pip install numpy && python3 -m pip install scikit-learn
-RUN python3 -m pip install scikit-learn
+RUN python3 -m pip install scikit-learn pandas torcheval
 
 # Allow colors in bash
 RUN echo 'PS1="\[\033[1;36m\]\h \[\033[1;34m\]\W\[\033[0;35m\] \[\033[1;36m\]# \[\033[0m\]"' >> /root/.bashrc \
