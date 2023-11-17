@@ -126,10 +126,8 @@ int main(int argc, char **argv)
                                                             models_of_client, entries_per_model);
     }
     if (mode == 2){
-        aggregated_model = init_aggregation_normal_avg(mpc_role, address, port, seclvl, mt_alg, global_model,
-                                                            models_of_client, entries_per_model);
-        //aggregated_model = init_aggregation_q_fed(mpc_role, address, port, seclvl, mt_alg, global_model,
-         //                                                   models_of_client,h_values,  entries_per_model);
+        aggregated_model = init_aggregation_q_fed(mpc_role, address, port, seclvl, mt_alg, global_model,
+                                                          models_of_client,h_values,  entries_per_model);
     }
     cout << get_time_as_string() << "Aggregation Component is Done" << endl;
 
