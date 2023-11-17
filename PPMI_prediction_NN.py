@@ -183,7 +183,7 @@ def calculate_delta(q, loss, deltawt):
     return loss ** q * deltawt
 
 def calculate_ht(q, loss, deltawt, L):
-    return q * loss.detach().numpy() ** q * pow(np.linalg.norm(deltawt.detach().numpy(),2), 2) + loss.detach().numpy() ** q * L
+    return q * loss.detach().numpy() ** q * np.linalg.norm(deltawt.detach().numpy(),2) + loss.detach().numpy() ** q * L
 
 y_pred = global_model(X_train)
 loss = loss_fn(y_pred, torch.reshape(y_train, (-1,)).to(torch.int64))
