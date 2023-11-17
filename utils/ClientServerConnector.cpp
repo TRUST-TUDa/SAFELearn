@@ -39,6 +39,7 @@ uint8_t find_delta_size(string directory, ROLE_TYPE role){
 * Returns 2 arrays. One for the delta's of a single model and one for the h value of the model
 */
 tuple<NUMBER_TYPE *, NUMBER_TYPE *> read_deltas_and_h(const string &file_name, uint32_t number_of_entries) {
+    cout << number_of_entries << endl;
     auto *delta_values = new NUMBER_TYPE[number_of_entries];
     auto *h_value = new NUMBER_TYPE[1];
     uint32_t next_entry_to_read = 0;
@@ -48,16 +49,16 @@ tuple<NUMBER_TYPE *, NUMBER_TYPE *> read_deltas_and_h(const string &file_name, u
     while (input_file >> a) {
         if(next_entry_to_read == 0){
             h_value[0] = a; 
-            cout << "filling h " << number_of_entries << endl;
+            cout << "filling h " << next_entry_to_read << endl;
         }
         else {
-            cout << "filling delta array " << number_of_entries << endl;
+            cout << "filling delta array " << next_entry_to_read << endl;
             delta_values[next_entry_to_read-1] = a;
         }
-        //assert(next_entry_to_read < number_of_entries+1);  // +1 because next_entry_to_read will read including the h value so it will 1 larger than our delta size
+        assert(next_entry_to_read < number_of_entries+1);  // +1 because next_entry_to_read will read including the h value so it will 1 larger than our delta size
         next_entry_to_read++;
     }
-    //assert(next_entry_to_read == number_of_entries+1);
+    assert(next_entry_to_read == number_of_entries+1);
     return {delta_values, h_value};
 }
 
