@@ -13,7 +13,7 @@ from torcheval.metrics.functional import multiclass_f1_score, multiclass_auroc
 # Change constants here
 ###############################################################################
 LIPSCHITZCONSTANT = 1
-Q_FACTOR = 1
+Q_FACTOR = 0
 TORCHSEED = 42
 DEFAULT_DEVICE = "cpu"
 NUMBER_OF_CLIENTS =3
@@ -106,56 +106,49 @@ delete_files(f"{MODEL_PATH}Model_*")
 delete_files(f"{MODEL_PATH}Loss_*")
 delete_files(f"{MODEL_PATH}Delta_*")
 
-if (len(sys.argv) == 1):
-    for client_index, split_data in enumerate(clients):
-        train_size = int(0.8 * len(split_data))
-        test_size = len(split_data) - train_size
-        train_data, test_data = data.random_split(split_data, [train_size, test_size], generator=generator)
+
+
+
+for client_index, split_data in enumerate(clients):
+    train_size = int(0.8 * len(split_data))
+    test_size = len(split_data) - train_size
+    train_data, test_data = data.random_split(split_data, [train_size, test_size], generator=generator)
         
-        X_train = torch.tensor(train_data.dataset[:, 2:], dtype=torch.float32)
-        y_train = torch.tensor(train_data.dataset[:, 1], dtype=torch.float32).reshape(-1, 1)
-        X_test = torch.tensor(test_data.dataset[:, 2:], dtype=torch.float32)
-        y_test = torch.tensor(test_data.dataset[:, 1], dtype=torch.float32).reshape(-1, 1)
+    X_train = torch.tensor(train_data.dataset[:, 2:], dtype=torch.float32)
+    y_train = torch.tensor(train_data.dataset[:, 1], dtype=torch.float32).reshape(-1, 1)
+    X_test = torch.tensor(test_data.dataset[:, 2:], dtype=torch.float32)
+    y_test = torch.tensor(test_data.dataset[:, 1], dtype=torch.float32).reshape(-1, 1)
+    model = PPMIModel()
         
-        model = PPMIModel()
-        # if there exists a global model from earlier learnings import it
-        model.load_state_dict(torch.load(GLOBAL_MODEL_PATH))
+    # if there exists a global model from earlier learnings import it
+    model.load_state_dict(torch.load(GLOBAL_MODEL_PATH))
+    loss_fn = nn.CrossEntropyLoss()
 
-        loss_fn = nn.CrossEntropyLoss()
-        optimizer = optim.Adam(model.parameters())
 
-        def train_model(model, optimizer, X_train, y_train, loss_fn, n_epochs=100):
-            model.train()
-            model.to(device)
-                        
-            for epoch in range(n_epochs):
-                for i in range(0, len(X_train), batch_size):
-                    Xbatch = X_train[i:i+batch_size].to(device)
-                    ybatch = y_train[i:i+batch_size].to(device)
-                    y_pred = model(Xbatch)
-                    loss = loss_fn(y_pred, torch.reshape(ybatch, (-1,)).to(torch.int64))
-                    optimizer.zero_grad()
-                    loss.backward()
-                    optimizer.step()
-                print(f'Client {client_index}, Epoch {epoch}, latest loss {loss}')
-            torch.save(model.state_dict(), f"{MODEL_PATH}Model_{client_index}.txt")
-            #torch.save(loss_fn(y_pred, torch.reshape(y_train, (-1,)).to(torch.int64)), f"model/PPMImodels/Loss_{client_index}")
+    optimizer = optim.Adam(model.parameters())
+    def train_model(model, optimizer, X_train, y_train, loss_fn, n_epochs=100):
 
-        ## execute the code    
+        model.train()
+        model.to(device)
+                    
+        for epoch in range(n_epochs):
+            for i in range(0, len(X_train), batch_size):
+                Xbatch = X_train[i:i+batch_size].to(device)
+                ybatch = y_train[i:i+batch_size].to(device)
+                y_pred = model(Xbatch)
+                loss = loss_fn(y_pred, torch.reshape(ybatch, (-1,)).to(torch.int64))
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+            print(f'Client {client_index}, Epoch {epoch}, latest loss {loss}')
+        torch.save(model.state_dict(), f"{MODEL_PATH}Model_{client_index}.txt")
+        #torch.save(loss_fn(y_pred, torch.reshape(y_train, (-1,)).to(torch.int64)), f"model/PPMImodels/Loss_{client_index}"
+    ## execute the code    
+
+    if (len(sys.argv) == 1):
         train_model(model, optimizer, X_train, y_train, loss_fn, n_epochs)
-        eval_model(model, X_test, y_test)
+    eval_model(model, X_test, y_test)
         
-# if a cli argument is given only evaluate
-else: 
-    if os.path.exists(GLOBAL_MODEL_PATH):
-        model = PPMIModel()
-        model.load_state_dict(torch.load(GLOBAL_MODEL_PATH))
-        X_test_all = torch.tensor(fullset[:, 2:], dtype=torch.float32)
-        y_test_all = torch.tensor(fullset[:, 1], dtype=torch.float32).reshape(-1, 1)
-        eval_model(model, X_test_all, y_test_all)
-    else: 
-        print("no global model found")
-        quit()
 
 
 def get_one_vec_sorted_layers(model):
