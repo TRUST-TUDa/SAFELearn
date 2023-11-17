@@ -178,16 +178,17 @@ def calculate_delta(q, loss, deltawt):
 def calculate_ht(q, loss, deltawt, L):
     return q * loss.detach().numpy() ** q * np.linalg.norm(deltawt.detach().numpy(),2) + loss.detach().numpy() ** q * L
 
-y_pred = global_model(X_train)
-loss = loss_fn(y_pred, torch.reshape(y_train, (-1,)).to(torch.int64))
+if (len(sys.argv) == 1):
+    y_pred = global_model(X_train)
+    loss = loss_fn(y_pred, torch.reshape(y_train, (-1,)).to(torch.int64))
 
-for client_index in range(len(clients)):
-    model = PPMIModel()
-    model.load_state_dict(torch.load(f"{MODEL_PATH}Model_{client_index}.txt"))
-    deltawt = calculate_delta_wt(global_model, model, LIPSCHITZCONSTANT)
-    delta = calculate_delta(Q_FACTOR, loss, deltawt)
-    ht = calculate_ht(Q_FACTOR, loss, deltawt, LIPSCHITZCONSTANT)
-    combined = np.concatenate((np.array([ht]), delta.detach().numpy()))
-    np.savetxt(f"{MODEL_PATH}Delta_{client_index}.txt", combined, fmt='%.8f')
-    #f.write(delta.numpy() + "\n" + ht.numpy())
-    #f.close()
+    for client_index in range(len(clients)):
+        model = PPMIModel()
+        model.load_state_dict(torch.load(f"{MODEL_PATH}Model_{client_index}.txt"))
+        deltawt = calculate_delta_wt(global_model, model, LIPSCHITZCONSTANT)
+        delta = calculate_delta(Q_FACTOR, loss, deltawt)
+        ht = calculate_ht(Q_FACTOR, loss, deltawt, LIPSCHITZCONSTANT)
+        combined = np.concatenate((np.array([ht]), delta.detach().numpy()))
+        np.savetxt(f"{MODEL_PATH}Delta_{client_index}.txt", combined, fmt='%.8f')
+        #f.write(delta.numpy() + "\n" + ht.numpy())
+        #f.close()
