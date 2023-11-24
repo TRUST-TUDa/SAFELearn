@@ -107,6 +107,7 @@ ArithmeticShare q_fed_over_updates(uint32_t bitlen, size_t number_of_elements, v
     }
     
     ArithmeticShare division = perform_division(bitlen, number_of_elements, ac, yc, summed_deltas, summed_h);
+    ac->PutPrintValueGate(division, "division");
     ArithmeticShare aggregated_update = ac->PutSUBGate(global_model, division);
     return aggregated_update;
 }
