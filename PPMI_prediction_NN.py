@@ -44,6 +44,7 @@ fullset = torch.Tensor(fullset.to_numpy())
 
 set_size = len(fullset)
 clients = []
+client_loss = []
 
 # Split the data into non-overlapping parts
 split_size = len(fullset) // NUMBER_OF_CLIENTS 
@@ -80,10 +81,12 @@ class PPMIModel(nn.Module):
 
 def eval_model(model, X_test, y_test):
     model.eval()
+    loss_fn = nn.CrossEntropyLoss()
 
     with torch.no_grad():
         y_pred = model(X_test)
-        y_pred_integer = y_pred.round().cpu().numpy()
+        client_loss.append(loss_fn(y_pred, torch.reshape(y_test, (-1,)).to(torch.int64)))
+        #y_pred_integer = y_pred.round().cpu().numpy()
         print(multiclass_f1_score(y_pred, torch.reshape( y_test, (-1, )), num_classes=3))
         print(multiclass_auroc(y_pred, torch.reshape( y_test, (-1, )), num_classes=3))
 
@@ -179,15 +182,13 @@ def calculate_ht(q, loss, deltawt, L):
     return q * loss ** (q-1) * np.linalg.norm(deltawt.detach().numpy(),2) + loss ** q * L
 
 if (len(sys.argv) == 1):
-    y_pred = global_model(X_train)
-    loss = loss_fn(y_pred, torch.reshape(y_train, (-1,)).to(torch.int64))
 
     for client_index in range(len(clients)):
         model = PPMIModel()
         model.load_state_dict(torch.load(f"{MODEL_PATH}Model_{client_index}.txt"))
         deltawt = calculate_delta_wt(global_model, model, LIPSCHITZCONSTANT)
-        delta = calculate_delta(Q_FACTOR, loss, deltawt)
-        ht = calculate_ht(Q_FACTOR, loss, deltawt, LIPSCHITZCONSTANT)
+        delta = calculate_delta(Q_FACTOR, client_loss[client_index], deltawt)
+        ht = calculate_ht(Q_FACTOR, client_loss[client_index], deltawt, LIPSCHITZCONSTANT)
         combined = np.concatenate((np.array([ht.detach().numpy()]), delta.detach().numpy()))
         np.savetxt(f"{MODEL_PATH}Delta_{client_index}.txt", combined, fmt='%.8f')
         #f.write(delta.numpy() + "\n" + ht.numpy())
