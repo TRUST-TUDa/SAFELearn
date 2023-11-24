@@ -99,7 +99,7 @@ def create_splits(global_model_path, local_model_paths, q=False):
         if q:
             delta_wk_h_np = np.loadtxt(path)
             vec = torch.tensor(delta_wk_h_np)
-            delta_part = restrict_values(vec[1:-1])
+            delta_part = restrict_values(vec[1:])
             restricted_local_vec = torch.tensor(np.concatenate((vec[0].numpy().reshape(1,),delta_part.numpy())))
         else:
             local_model = torch.load(path)
