@@ -40,14 +40,16 @@ uint32_t find_delta_size(string directory, ROLE_TYPE role){
 */
 tuple<NUMBER_TYPE *, NUMBER_TYPE *> read_deltas_and_h(const string &file_name, uint32_t number_of_entries) {
     auto *delta_values = new NUMBER_TYPE[number_of_entries];
-    auto *h_value = new NUMBER_TYPE[1];
+    auto *h_value = new NUMBER_TYPE[number_of_entries];
     uint32_t next_entry_to_read = 0;
 
     std::fstream input_file(file_name, std::ios_base::in);
     SIGNED_NUMBER_TYPE a;
     while (input_file >> a) {
         if(next_entry_to_read == 0){
-            h_value[0] = a; 
+            for (int i = 0; i< number_of_entries; i++){
+                h_value[i] = a; 
+            }
         }
         else {
             delta_values[next_entry_to_read-1] = a;
