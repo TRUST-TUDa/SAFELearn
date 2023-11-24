@@ -44,13 +44,15 @@ fullset = torch.Tensor(fullset.to_numpy())
 
 set_size = len(fullset)
 clients = []
-client_loss = []
+
 
 # Split the data into non-overlapping parts
 split_size = len(fullset) // NUMBER_OF_CLIENTS 
 for client_index in range(NUMBER_OF_CLIENTS):
     split = fullset[client_index * split_size: (client_index + 1) * split_size]
     clients.append(split)
+
+client_loss = np.zeros(NUMBER_OF_CLIENTS) 
 
 n_epochs = 50
 batch_size = 64
@@ -189,7 +191,7 @@ if (len(sys.argv) == 1):
         deltawt = calculate_delta_wt(global_model, model, LIPSCHITZCONSTANT)
         delta = calculate_delta(Q_FACTOR, client_loss[client_index], deltawt)
         ht = calculate_ht(Q_FACTOR, client_loss[client_index], deltawt, LIPSCHITZCONSTANT)
-        combined = np.concatenate((np.array([ht.detach().numpy()]), delta.detach().numpy()))
+        combined = np.concatenate((np.array([ht]), delta.detach().numpy()))
         np.savetxt(f"{MODEL_PATH}Delta_{client_index}.txt", combined, fmt='%.8f')
         #f.write(delta.numpy() + "\n" + ht.numpy())
         #f.close()
