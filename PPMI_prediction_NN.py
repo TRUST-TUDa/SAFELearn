@@ -173,10 +173,10 @@ def calculate_delta_wt(global_model, model, L):
     return L * (vec_glob - vec_mod)
 
 def calculate_delta(q, loss, deltawt):
-    return loss ** q * deltawt
+    return loss.detach().numpy() ** q * deltawt.detach().numpy()
 
 def calculate_ht(q, loss, deltawt, L):
-    return q * loss.detach().numpy() ** q * np.linalg.norm(deltawt.detach().numpy(),2) + loss.detach().numpy() ** q * L
+    return q * loss.detach().numpy() ** (q-1) * np.linalg.norm(deltawt.detach().numpy(),2) + loss.detach().numpy() ** q * L
 
 if (len(sys.argv) == 1):
     y_pred = global_model(X_train)
