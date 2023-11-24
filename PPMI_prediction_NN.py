@@ -79,13 +79,13 @@ class PPMIModel(nn.Module):
         x = self.linear5(x)
         return x
 
-def eval_model(model, X_test, y_test):
+def eval_model(model, X_test, y_test, client_index):
     model.eval()
     loss_fn = nn.CrossEntropyLoss()
 
     with torch.no_grad():
         y_pred = model(X_test)
-        client_loss.append(loss_fn(y_pred, torch.reshape(y_test, (-1,)).to(torch.int64)))
+        client_loss[client_index] = loss_fn(y_pred, torch.reshape(y_test, (-1,)).to(torch.int64))
         #y_pred_integer = y_pred.round().cpu().numpy()
         print(multiclass_f1_score(y_pred, torch.reshape( y_test, (-1, )), num_classes=3))
         print(multiclass_auroc(y_pred, torch.reshape( y_test, (-1, )), num_classes=3))
@@ -150,7 +150,7 @@ for client_index, split_data in enumerate(clients):
 
     if (len(sys.argv) == 1):
         train_model(model, optimizer, X_train, y_train, loss_fn, n_epochs)
-    eval_model(model, X_test, y_test)
+    eval_model(model, X_test, y_test, client_index)
         
 
 
