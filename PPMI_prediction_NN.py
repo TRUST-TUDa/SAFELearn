@@ -181,7 +181,7 @@ def calculate_delta(q, loss, deltawt):
     return loss ** q * deltawt
 
 def calculate_ht(q, loss, deltawt, L):
-    return q * loss ** (q-1) * np.linalg.norm(deltawt.detach().numpy(),2) + loss ** q * L
+    return q * loss ** (q-1) * np.linalg.norm(deltawt.detach().numpy(),2) ** 2 + loss ** q * L
 
 if (len(sys.argv) == 1):
 
