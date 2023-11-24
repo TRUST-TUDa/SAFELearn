@@ -99,11 +99,15 @@ def create_splits(global_model_path, local_model_paths, q=False):
         if q:
             delta_wk_h_np = np.loadtxt(path)
             vec = torch.tensor(delta_wk_h_np)
+            delta_part = restrict_values(vec[1:-1])
+            restricted_local_vec = torch.tensor(np.concatenate((vec[0].numpy().reshape(1,),delta_part.numpy())))
         else:
             local_model = torch.load(path)
             vec = get_one_vec_sorted_layers(local_model)
+            restricted_local_vec = restrict_values(vec) 
 
-        restricted_local_vec = restrict_values(vec)    
+           
+        print("restrticted ", restricted_local_vec)
         a, b = split(restricted_local_vec)
         a_file = f'{SPLITTED_FILE_DIR}/A_C{i:03d}.txt'
         b_file = f'{SPLITTED_FILE_DIR}/B_C{i:03d}.txt'
