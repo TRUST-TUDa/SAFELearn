@@ -173,10 +173,10 @@ def calculate_delta_wt(global_model, model, L):
     return L * (vec_glob - vec_mod)
 
 def calculate_delta(q, loss, deltawt):
-    return loss.detach().numpy() ** q * deltawt.detach().numpy()
+    return loss ** q * deltawt
 
 def calculate_ht(q, loss, deltawt, L):
-    return q * loss.detach().numpy() ** (q-1) * np.linalg.norm(deltawt.detach().numpy(),2) + loss.detach().numpy() ** q * L
+    return q * loss ** (q-1) * np.linalg.norm(deltawt.detach().numpy(),2) + loss ** q * L
 
 if (len(sys.argv) == 1):
     y_pred = global_model(X_train)
@@ -188,7 +188,7 @@ if (len(sys.argv) == 1):
         deltawt = calculate_delta_wt(global_model, model, LIPSCHITZCONSTANT)
         delta = calculate_delta(Q_FACTOR, loss, deltawt)
         ht = calculate_ht(Q_FACTOR, loss, deltawt, LIPSCHITZCONSTANT)
-        combined = np.concatenate((np.array([ht]), delta.detach().numpy()))
+        combined = np.concatenate((np.array([ht.detach().numpy()]), delta.detach().numpy()))
         np.savetxt(f"{MODEL_PATH}Delta_{client_index}.txt", combined, fmt='%.8f')
         #f.write(delta.numpy() + "\n" + ht.numpy())
         #f.close()
